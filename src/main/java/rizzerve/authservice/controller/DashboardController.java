@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import rizzerve.authservice.dto.DashboardResponse;
 import rizzerve.authservice.dto.ProfileRequest;
 import rizzerve.authservice.dto.ProfileResponse;
+import rizzerve.authservice.service.UserService;
 
 @RestController
 @RequestMapping("/api")

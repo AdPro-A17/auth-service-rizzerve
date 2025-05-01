@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import rizzerve.authservice.dto.DashboardResponse;
 import rizzerve.authservice.dto.ProfileRequest;
 import rizzerve.authservice.dto.ProfileResponse;
+import rizzerve.authservice.service.UserService;
 
 import java.util.HashMap;
 import java.util.Map;
