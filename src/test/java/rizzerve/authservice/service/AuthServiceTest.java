@@ -1,5 +1,6 @@
 package rizzerve.authservice.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -40,115 +41,149 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    private RegisterRequest registerRequest;
-    private LoginRequest loginRequest;
-    private User user;
-    private final String TOKEN = "test.jwt.token";
+    private AutoCloseable closeable;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
 
-        registerRequest = RegisterRequest.builder()
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
+    }
+
+    @Test
+    void register_WithValidData_ReturnsAuthResponse() {
+        RegisterRequest request = RegisterRequest.builder()
                 .name("Test User")
                 .username("testuser")
-                .password("password123")
+                .password("password")
                 .role(Role.CUSTOMER)
                 .build();
 
-        loginRequest = LoginRequest.builder()
-                .username("testuser")
-                .password("password123")
+        User savedUser = User.builder()
+                .id(UUID.randomUUID())
+                .name(request.getName())
+                .username(request.getUsername())
+                .password("encodedPassword")
+                .role(request.getRole())
                 .build();
 
-        user = User.builder()
-                .id(UUID.randomUUID())
+        when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(jwtService.generateToken(any(User.class))).thenReturn("jwtToken");
+
+        AuthResponse response = authService.register(request);
+
+        assertNotNull(response);
+        assertEquals(request.getUsername(), response.getUsername());
+        assertEquals(request.getName(), response.getName());
+        assertEquals(request.getRole(), response.getRole());
+        assertEquals("jwtToken", response.getToken());
+
+        verify(userRepository).existsByUsername(request.getUsername());
+        verify(passwordEncoder).encode(request.getPassword());
+        verify(userRepository).save(any(User.class));
+        verify(jwtService).generateToken(any(User.class));
+    }
+
+    @Test
+    void register_WithExistingUsername_ThrowsException() {
+        RegisterRequest request = RegisterRequest.builder()
+                .name("Test User")
+                .username("existinguser")
+                .password("password")
+                .role(Role.CUSTOMER)
+                .build();
+
+        when(userRepository.existsByUsername(request.getUsername())).thenReturn(true);
+
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> authService.register(request));
+
+        assertEquals("Username already exists", exception.getMessage());
+        verify(userRepository).existsByUsername(request.getUsername());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void register_WithNullRole_DefaultsToCustomer() {
+        RegisterRequest request = RegisterRequest.builder()
                 .name("Test User")
                 .username("testuser")
+                .password("password")
+                .role(null)
+                .build();
+
+        User savedUser = User.builder()
+                .id(UUID.randomUUID())
+                .name(request.getName())
+                .username(request.getUsername())
                 .password("encodedPassword")
                 .role(Role.CUSTOMER)
                 .build();
 
-        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-        when(jwtService.generateToken(any())).thenReturn(TOKEN);
-    }
+        when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(jwtService.generateToken(any(User.class))).thenReturn("jwtToken");
 
-    @Test
-    void registerSuccess() {
-        when(userRepository.existsByUsername(anyString())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        AuthResponse response = authService.register(request);
 
-        AuthResponse response = authService.register(registerRequest);
-
-        verify(userRepository).existsByUsername("testuser");
-        verify(passwordEncoder).encode("password123");
-        verify(userRepository).save(any(User.class));
-        verify(jwtService).generateToken(any(User.class));
-
-        assertEquals(TOKEN, response.getToken());
-        assertEquals("testuser", response.getUsername());
-        assertEquals("Test User", response.getName());
+        assertNotNull(response);
         assertEquals(Role.CUSTOMER, response.getRole());
     }
 
     @Test
-    void registerWithNullRole() {
-        registerRequest.setRole(null);
+    void login_WithValidCredentials_ReturnsAuthResponse() {
+        LoginRequest request = LoginRequest.builder()
+                .username("testuser")
+                .password("password")
+                .build();
 
-        when(userRepository.existsByUsername(anyString())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .name("Test User")
+                .username(request.getUsername())
+                .password("encodedPassword")
+                .role(Role.CUSTOMER)
+                .build();
 
-        AuthResponse response = authService.register(registerRequest);
+        when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user)).thenReturn("jwtToken");
 
-        verify(userRepository).save(any(User.class));
-        assertEquals(Role.CUSTOMER, response.getRole());
-    }
+        AuthResponse response = authService.login(request);
 
-    @Test
-    void registerUsernameExists() {
-        when(userRepository.existsByUsername("testuser")).thenReturn(true);
-
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            authService.register(registerRequest);
-        });
-
-        verify(userRepository).existsByUsername("testuser");
-        verify(userRepository, never()).save(any(User.class));
-
-        assertEquals("Username already exists", exception.getMessage());
-    }
-
-    @Test
-    void loginSuccess() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-
-        AuthResponse response = authService.login(loginRequest);
+        assertNotNull(response);
+        assertEquals(user.getUsername(), response.getUsername());
+        assertEquals(user.getName(), response.getName());
+        assertEquals(user.getRole(), response.getRole());
+        assertEquals("jwtToken", response.getToken());
 
         verify(authenticationManager).authenticate(
-                new UsernamePasswordAuthenticationToken("testuser", "password123")
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
-        verify(userRepository).findByUsername("testuser");
+        verify(userRepository).findByUsername(request.getUsername());
         verify(jwtService).generateToken(user);
-
-        assertEquals(TOKEN, response.getToken());
-        assertEquals("testuser", response.getUsername());
-        assertEquals("Test User", response.getName());
-        assertEquals(Role.CUSTOMER, response.getRole());
     }
 
     @Test
-    void loginUserNotFound() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+    void login_WithNonExistentUser_ThrowsException() {
+        LoginRequest request = LoginRequest.builder()
+                .username("nonexistentuser")
+                .password("password")
+                .build();
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            authService.login(loginRequest);
-        });
+        when(userRepository.findByUsername(request.getUsername())).thenReturn(Optional.empty());
+        when(authenticationManager.authenticate(any())).thenReturn(null);
 
-        verify(authenticationManager).authenticate(
-                new UsernamePasswordAuthenticationToken("testuser", "password123")
-        );
-        verify(userRepository).findByUsername("testuser");
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> authService.login(request));
 
         assertEquals("User not found", exception.getMessage());
+        verify(authenticationManager).authenticate(any());
+        verify(userRepository).findByUsername(request.getUsername());
     }
 }
