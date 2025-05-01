@@ -2,13 +2,11 @@ package rizzerve.authservice.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rizzerve.authservice.model.Role;
 import rizzerve.authservice.model.User;
 
@@ -18,10 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
-@TestPropertySource(locations = "classpath:jwt.properties")
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "jwt.secret=testsecretkey1234567890onlyfortestingkkkkkkk",
+        "jwt.expiration=3600000"
+})
 class JwtServiceTest {
 
     @Autowired
