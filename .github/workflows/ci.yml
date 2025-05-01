@@ -1,6 +1,5 @@
 name: Continuous Integration (CI)
 
-## Run CI jobs on all branches by default
 on:
   push:
   pull_request:
@@ -27,6 +26,11 @@ jobs:
         run: |
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
           echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> $GITHUB_ENV
+
+      - name: Create jwt.properties file
+        run: |
+          echo "jwt.secret.key=${{ secrets.JWT_SECRET_KEY }}" > src/main/resources/jwt.properties
+          echo "jwt.expiration=${{ secrets.JWT_EXPIRATION }}" >> src/main/resources/jwt.properties
 
       - name: Run unit tests
         run: ./gradlew test
