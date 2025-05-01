@@ -20,9 +20,6 @@ import static org.mockito.Mockito.when;
 class SecurityConfigTest {
 
     @Mock
-    private JwtService jwtService;
-
-    @Mock
     private UserRepository userRepository;
 
     @InjectMocks
