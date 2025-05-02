@@ -8,30 +8,36 @@ import org.springframework.web.bind.annotation.*;
 import rizzerve.authservice.dto.DashboardResponse;
 import rizzerve.authservice.dto.ProfileRequest;
 import rizzerve.authservice.dto.ProfileResponse;
-import rizzerve.authservice.service.UserService;
+import rizzerve.authservice.model.User;
+import rizzerve.authservice.service.user.UserDashboardService;
+import rizzerve.authservice.service.user.UserProfileService;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class DashboardController {
-    private final UserService userService;
+    private final UserDashboardService dashboardService;
+    private final UserProfileService profileService;
 
     @GetMapping("/admin/dashboard")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<DashboardResponse> adminDashboard(Authentication authentication) {
-        return ResponseEntity.ok(userService.getAdminDashboard(authentication));
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(dashboardService.getAdminDashboard(user));
     }
 
     @GetMapping("/customer/dashboard")
     @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     public ResponseEntity<DashboardResponse> customerDashboard(Authentication authentication) {
-        return ResponseEntity.ok(userService.getCustomerDashboard(authentication));
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(dashboardService.getCustomerDashboard(user));
     }
 
     @PutMapping("/profile")
     public ResponseEntity<ProfileResponse> updateProfile(
             @RequestBody ProfileRequest request,
             Authentication authentication) {
-        return ResponseEntity.ok(userService.updateProfile(request, authentication));
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(profileService.updateProfile(request, user));
     }
 }
