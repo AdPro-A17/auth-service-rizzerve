@@ -7,6 +7,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import rizzerve.authservice.model.User;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +17,6 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -32,20 +33,29 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> claims = new HashMap<>();
+
+        if (userDetails instanceof User) {
+            User user = (User) userDetails;
+            claims.put("role", user.getRole().name());
+        }
+
+        return generateToken(claims, userDetails);
     }
 
-    public String generateToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
-        return Jwts.builder()
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return Jwts
+                .builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey())
                 .compact();
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -62,7 +72,8 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
+        return Jwts
+                .parser()
                 .verifyWith(getSignInKey())
                 .build()
                 .parseSignedClaims(token)
