@@ -19,11 +19,16 @@ jobs:
           ssh-keyscan ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
             # Step 1: Refresh DuckDNS IP
-            curl -k "https://www.duckdns.org/update?domains=${{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip="
-
+            curl -k "https://www.duckdns.org/update?domains=${DUCKDNS_DOMAIN}&token=${DUCKDNS_TOKEN}&ip="
+          
             # Step 2: Deploy latest staging code
             cd ~/auth-service-rizzerve
             git pull origin staging
@@ -31,5 +36,11 @@ jobs:
             docker stop auth-service || true
             docker rm auth-service || true
             docker build -t auth-service-rizzerve:latest .
-            docker run -d --name auth-service -p 8080:8080 auth-service-rizzerve:latest
+            docker run -d --name auth-service \
+              -p 8080:8080 \
+              -e DB_HOST='${DB_HOST}' \
+              -e DB_NAME='${DB_NAME}' \
+              -e DB_USER='${DB_USER}' \
+              -e DB_PASSWORD='${DB_PASSWORD}' \
+              auth-service-rizzerve:latest
           EOF
