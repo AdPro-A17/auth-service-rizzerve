@@ -2,12 +2,13 @@ package rizzerve.authservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@ActiveProfiles("test")
+@SpringBootTest(classes = AuthServiceApplication.class)
 class AuthServiceApplicationTests {
 
     @Test
     void contextLoads() {
     }
-
-} 
+}
