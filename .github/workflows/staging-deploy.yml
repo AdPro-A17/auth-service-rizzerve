@@ -20,15 +20,17 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          PGHOST: ${{ secrets.DB_HOST }}
+          PGDATABASE: ${{ secrets.DB_NAME }}
+          PGUSER: ${{ secrets.DB_USER }}
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          DUCKDNS_DOMAIN: ${{ secrets.DUCKDNS_DOMAIN }}
+          DUCKDNS_TOKEN: ${{ secrets.DUCKDNS_TOKEN }}
         run: |
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << EOF
             # Step 1: Refresh DuckDNS IP
             curl -k "https://www.duckdns.org/update?domains=${DUCKDNS_DOMAIN}&token=${DUCKDNS_TOKEN}&ip="
-          
+
             # Step 2: Deploy latest staging code
             cd ~/auth-service-rizzerve
             git pull origin staging
@@ -38,9 +40,9 @@ jobs:
             docker build -t auth-service-rizzerve:latest .
             docker run -d --name auth-service \
               -p 8080:8080 \
-              -e DB_HOST='${DB_HOST}' \
-              -e DB_NAME='${DB_NAME}' \
-              -e DB_USER='${DB_USER}' \
-              -e DB_PASSWORD='${DB_PASSWORD}' \
+              -e PGHOST='${PGHOST}' \
+              -e PGDATABASE='${PGDATABASE}' \
+              -e PGUSER='${PGUSER}' \
+              -e PGPASSWORD='${PGPASSWORD}' \
               auth-service-rizzerve:latest
           EOF
