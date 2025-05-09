@@ -1,18 +1,17 @@
 package rizzerve.authservice.security.token;
 
-import rizzerve.authservice.model.User;
+import rizzerve.authservice.model.Admin;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TokenClaimsExtractor {
-    public static Map<String, Object> extractUserClaims(User user) {
+    public static Map<String, Object> extractAdminClaims(Admin admin) {
         Map<String, Object> claims = new HashMap<>();
 
-        if (user.getId() != null) {
-            claims.put("userId", user.getId().toString());
+        if (admin.getId() != null) {
+            claims.put("adminId", admin.getId().toString());
         }
-        claims.put("role", user.getRole().name());
-        claims.put("name", user.getName());
+        claims.put("name", admin.getName());
 
         return claims;
     }

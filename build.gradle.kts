@@ -2,7 +2,7 @@ plugins {
     java
     jacoco
     id("org.sonarqube") version "6.0.1.5171"
-    id("org.springframework.boot") version "3.4.4"
+    id("org.springframework.boot") version "3.2.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
 }
@@ -33,6 +33,12 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.1")
+    }
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
@@ -46,8 +52,11 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     compileOnly("org.projectlombok:lombok")
+
+    testImplementation("com.h2database:h2")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

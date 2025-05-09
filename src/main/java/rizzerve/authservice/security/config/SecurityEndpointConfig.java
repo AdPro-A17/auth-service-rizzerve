@@ -39,20 +39,20 @@ public class SecurityEndpointConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(getPublicEndpoints().toArray(new String[0])).permitAll()
                 .requestMatchers(getAdminEndpoints().toArray(new String[0])).hasAuthority("ROLE_ADMIN")
-                .requestMatchers(getCustomerEndpoints().toArray(new String[0])).hasAuthority("ROLE_CUSTOMER")
                 .anyRequest().authenticated()
         );
     }
 
     protected List<String> getPublicEndpoints() {
-        return List.of("/api/auth/**", "/h2-console/**");
+        return List.of(
+                "/api/auth/**",
+                "/api/customer/session/**",
+                "/h2-console/**",
+                "/api/table/**"
+        );
     }
 
     protected List<String> getAdminEndpoints() {
         return List.of("/api/admin/**");
-    }
-
-    protected List<String> getCustomerEndpoints() {
-        return List.of("/api/customer/**");
     }
 }
