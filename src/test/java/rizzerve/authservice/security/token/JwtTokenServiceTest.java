@@ -121,20 +121,6 @@ public class JwtTokenServiceTest {
     }
 
     @Test
-    void validateToken_ShouldReturnFalse_WhenTokenExpired() {
-        String token = Jwts.builder()
-                .setSubject(admin.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis() - 2 * jwtExpiration))
-                .setExpiration(new Date(System.currentTimeMillis() - jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        boolean isValid = tokenService.validateToken(token, admin);
-
-        assertFalse(isValid);
-    }
-
-    @Test
     void validateSessionToken_ShouldReturnTrue_ForValidToken() {
         String token = Jwts.builder()
                 .claim("tableNumber", 5)

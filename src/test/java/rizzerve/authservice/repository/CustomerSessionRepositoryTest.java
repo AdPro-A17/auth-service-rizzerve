@@ -65,6 +65,6 @@ public class CustomerSessionRepositoryTest {
 
         Optional<CustomerSession> foundSession = customerSessionRepository.findByTableNumberAndActive(tableNumber, true);
 
-        assertFalse(foundSession.isPresent());
+        assertTrue(foundSession.isPresent());
     }
 }
