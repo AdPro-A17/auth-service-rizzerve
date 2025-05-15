@@ -1,53 +1,61 @@
 package rizzerve.authservice.security.token;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import rizzerve.authservice.model.Role;
-import rizzerve.authservice.model.User;
+import rizzerve.authservice.model.Admin;
 
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
-class TokenClaimsExtractorTest {
+public class TokenClaimsExtractorTest {
 
     @Test
-    void extractUserClaimsShouldReturnExpectedClaims() {
-        UUID userId = UUID.randomUUID();
-        User user = User.builder()
-                .id(userId)
-                .name("Test User")
-                .username("test@example.com")
-                .role(Role.CUSTOMER)
-                .build();
+    void extractAdminClaims_withValidAdmin_shouldReturnCorrectClaims() {
+        UUID adminId = UUID.randomUUID();
+        String name = "Test Admin";
 
-        Map<String, Object> claims = TokenClaimsExtractor.extractUserClaims(user);
+        Admin admin = new Admin();
+        admin.setId(adminId);
+        admin.setName(name);
 
-        assertNotNull(claims);
-        assertEquals(3, claims.size());
-        assertEquals(userId.toString(), claims.get("userId"));
-        assertEquals(Role.CUSTOMER.name(), claims.get("role"));
-        assertEquals("Test User", claims.get("name"));
-    }
-
-    @Test
-    void extractUserClaimsWithNullIdShouldNotIncludeUserId() {
-        User user = User.builder()
-                .id(null)
-                .name("Test User")
-                .username("test@example.com")
-                .role(Role.CUSTOMER)
-                .build();
-
-        Map<String, Object> claims = TokenClaimsExtractor.extractUserClaims(user);
+        Map<String, Object> claims = TokenClaimsExtractor.extractAdminClaims(admin);
 
         assertNotNull(claims);
         assertEquals(2, claims.size());
-        assertFalse(claims.containsKey("userId"));
-        assertEquals(Role.CUSTOMER.name(), claims.get("role"));
-        assertEquals("Test User", claims.get("name"));
+        assertEquals(adminId.toString(), claims.get("adminId"));
+        assertEquals(name, claims.get("name"));
+    }
+
+    @Test
+    void extractAdminClaims_withNullAdminId_shouldNotIncludeIdInClaims() {
+        String name = "Test Admin";
+
+        Admin admin = new Admin();
+        admin.setId(null);
+        admin.setName(name);
+
+        Map<String, Object> claims = TokenClaimsExtractor.extractAdminClaims(admin);
+
+        assertNotNull(claims);
+        assertEquals(1, claims.size());
+        assertFalse(claims.containsKey("adminId"));
+        assertEquals(name, claims.get("name"));
+    }
+
+    @Test
+    void extractAdminClaims_withNullName_shouldIncludeNullName() {
+        UUID adminId = UUID.randomUUID();
+
+        Admin admin = new Admin();
+        admin.setId(adminId);
+        admin.setName(null);
+
+        Map<String, Object> claims = TokenClaimsExtractor.extractAdminClaims(admin);
+
+        assertNotNull(claims);
+        assertEquals(2, claims.size());
+        assertEquals(adminId.toString(), claims.get("adminId"));
+        assertNull(claims.get("name"));
     }
 }

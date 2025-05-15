@@ -1,112 +1,194 @@
 package rizzerve.authservice.security.token;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
+import rizzerve.authservice.model.Admin;
+import io.jsonwebtoken.io.Decoders;
 
+import java.security.Key;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class JwtTokenServiceTest {
+public class JwtTokenServiceTest {
 
     @InjectMocks
-    private JwtTokenService jwtTokenService;
+    private JwtTokenService tokenService;
 
-    @Mock
-    private UserDetails userDetails;
-
-    private final String secretKey = "testsecretkeythatisveryverylongandmustbeatleast256bits";
-    private final long jwtExpiration = 86400000; // 24 hours
+    private String secretKey;
+    private long jwtExpiration;
+    private Admin admin;
+    private Key signingKey;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(jwtTokenService, "secretKey", secretKey);
-        ReflectionTestUtils.setField(jwtTokenService, "jwtExpiration", jwtExpiration);
+        secretKey = "5170c563e2abfd66aef4d6e842640a489f7b54d75e036c984d67b7c78113c0c8";
+        jwtExpiration = 86400000;
+
+        ReflectionTestUtils.setField(tokenService, "secretKey", secretKey);
+        ReflectionTestUtils.setField(tokenService, "jwtExpiration", jwtExpiration);
+
+        admin = Admin.builder()
+                .id(UUID.randomUUID())
+                .username("admin")
+                .name("Admin User")
+                .password("password")
+                .build();
+
+        signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
     @Test
-    void generateTokenShouldCreateValidToken() {
-        String username = "test@example.com";
-        when(userDetails.getUsername()).thenReturn(username);
-
+    void generateToken_ShouldCreateValidToken() {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", UUID.randomUUID().toString());
-        claims.put("role", "CUSTOMER");
+        claims.put("adminId", admin.getId().toString());
+        claims.put("name", admin.getName());
 
-        String token = jwtTokenService.generateToken(userDetails, claims);
+        String token = tokenService.generateToken(admin, claims);
 
         assertNotNull(token);
 
-        String extractedUsername = jwtTokenService.extractUsername(token);
-        assertEquals(username, extractedUsername);
+        Claims parsedClaims = Jwts.parser()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        assertEquals(admin.getUsername(), parsedClaims.getSubject());
+        assertEquals(admin.getId().toString(), parsedClaims.get("adminId", String.class));
+        assertEquals(admin.getName(), parsedClaims.get("name", String.class));
     }
 
     @Test
-    void validateTokenShouldReturnTrueForValidToken() {
-        String username = "test@example.com";
-        when(userDetails.getUsername()).thenReturn(username);
+    void generateSessionToken_ShouldCreateValidToken() {
+        Integer tableNumber = 5;
 
-        Map<String, Object> claims = new HashMap<>();
-        String token = jwtTokenService.generateToken(userDetails, claims);
+        String token = tokenService.generateSessionToken(tableNumber);
 
-        boolean isValid = jwtTokenService.validateToken(token, userDetails);
+        assertNotNull(token);
+
+        Claims parsedClaims = Jwts.parser()
+                .setSigningKey(signingKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        assertEquals(tableNumber, parsedClaims.get("tableNumber", Integer.class));
+    }
+
+    @Test
+    void validateToken_ShouldReturnTrue_ForValidToken() {
+        String token = Jwts.builder()
+                .setSubject(admin.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+
+        boolean isValid = tokenService.validateToken(token, admin);
 
         assertTrue(isValid);
     }
 
     @Test
-    void validateTokenShouldReturnFalseForInvalidUsername() {
-        String username = "test@example.com";
-        when(userDetails.getUsername()).thenReturn(username);
+    void validateToken_ShouldReturnFalse_WhenUsernameMismatch() {
+        Admin otherAdmin = Admin.builder()
+                .username("other-admin")
+                .build();
 
-        Map<String, Object> claims = new HashMap<>();
-        String token = jwtTokenService.generateToken(userDetails, claims);
+        String token = Jwts.builder()
+                .setSubject(admin.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
 
-        UserDetails differentUser = mock(UserDetails.class);
-        when(differentUser.getUsername()).thenReturn("different@example.com");
-
-        boolean isValid = jwtTokenService.validateToken(token, differentUser);
+        boolean isValid = tokenService.validateToken(token, otherAdmin);
 
         assertFalse(isValid);
     }
 
     @Test
-    void extractUserIdShouldReturnNullWhenNotPresent() {
-        String username = "test@example.com";
-        when(userDetails.getUsername()).thenReturn(username);
+    void validateSessionToken_ShouldReturnTrue_ForValidToken() {
+        String token = Jwts.builder()
+                .claim("tableNumber", 5)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
 
-        Map<String, Object> claims = new HashMap<>();
-        String token = jwtTokenService.generateToken(userDetails, claims);
+        boolean isValid = tokenService.validateSessionToken(token);
 
-        UUID userId = jwtTokenService.extractUserId(token);
-
-        assertNull(userId);
+        assertTrue(isValid);
     }
 
     @Test
-    void extractUserIdShouldReturnUuidWhenPresent() {
-        String username = "test@example.com";
-        when(userDetails.getUsername()).thenReturn(username);
+    void validateSessionToken_ShouldReturnFalse_WhenTokenExpired() {
+        String token = Jwts.builder()
+                .claim("tableNumber", 5)
+                .setIssuedAt(new Date(System.currentTimeMillis() - 2 * jwtExpiration))
+                .setExpiration(new Date(System.currentTimeMillis() - jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
 
-        UUID expectedId = UUID.randomUUID();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", expectedId.toString());
+        boolean isValid = tokenService.validateSessionToken(token);
 
-        String token = jwtTokenService.generateToken(userDetails, claims);
+        assertFalse(isValid);
+    }
 
-        UUID userId = jwtTokenService.extractUserId(token);
+    @Test
+    void extractUsername_ShouldReturnUsername() {
+        String token = Jwts.builder()
+                .setSubject(admin.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
 
-        assertNotNull(userId);
-        assertEquals(expectedId, userId);
+        String username = tokenService.extractUsername(token);
+
+        assertEquals(admin.getUsername(), username);
+    }
+
+    @Test
+    void extractAdminId_ShouldReturnAdminId() {
+        String token = Jwts.builder()
+                .setSubject(admin.getUsername())
+                .claim("adminId", admin.getId().toString())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+
+        UUID adminId = tokenService.extractAdminId(token);
+
+        assertEquals(admin.getId(), adminId);
+    }
+
+    @Test
+    void extractTableNumber_ShouldReturnTableNumber() {
+        Integer tableNumber = 5;
+        String token = Jwts.builder()
+                .claim("tableNumber", tableNumber)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+
+        Integer extractedTableNumber = tokenService.extractTableNumber(token);
+
+        assertEquals(tableNumber, extractedTableNumber);
     }
 }

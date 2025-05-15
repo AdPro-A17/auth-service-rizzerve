@@ -11,13 +11,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import rizzerve.authservice.repository.UserRepository;
+import rizzerve.authservice.repository.AdminRepository;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityAuthProviderConfig {
 
-    private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -26,8 +26,8 @@ public class SecurityAuthProviderConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        return username -> adminRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Admin not found: " + username));
     }
 
     @Bean

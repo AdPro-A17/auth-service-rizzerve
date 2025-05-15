@@ -35,9 +35,29 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
+    public String generateSessionToken(Integer tableNumber) {
+        // Generate a simple session token for customer
+        return Jwts.builder()
+                .claim("tableNumber", tableNumber)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    @Override
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    @Override
+    public boolean validateSessionToken(String token) {
+        try {
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -46,9 +66,14 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
-    public UUID extractUserId(String token) {
-        String userId = extractClaim(token, claims -> claims.get("userId", String.class));
-        return userId != null ? UUID.fromString(userId) : null;
+    public UUID extractAdminId(String token) {
+        String adminId = extractClaim(token, claims -> claims.get("adminId", String.class));
+        return adminId != null ? UUID.fromString(adminId) : null;
+    }
+
+    @Override
+    public Integer extractTableNumber(String token) {
+        return extractClaim(token, claims -> claims.get("tableNumber", Integer.class));
     }
 
     private boolean isTokenExpired(String token) {
