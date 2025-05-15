@@ -22,7 +22,7 @@ public class TokenClaimsExtractorTest {
         Map<String, Object> claims = TokenClaimsExtractor.extractAdminClaims(admin);
 
         assertNotNull(claims);
-        assertEquals(2, claims.size());
+        assertEquals(3, claims.size());
         assertEquals(adminId.toString(), claims.get("adminId"));
         assertEquals(name, claims.get("name"));
     }
@@ -38,7 +38,7 @@ public class TokenClaimsExtractorTest {
         Map<String, Object> claims = TokenClaimsExtractor.extractAdminClaims(admin);
 
         assertNotNull(claims);
-        assertEquals(1, claims.size());
+        assertEquals(2, claims.size());
         assertFalse(claims.containsKey("adminId"));
         assertEquals(name, claims.get("name"));
     }
@@ -54,7 +54,7 @@ public class TokenClaimsExtractorTest {
         Map<String, Object> claims = TokenClaimsExtractor.extractAdminClaims(admin);
 
         assertNotNull(claims);
-        assertEquals(2, claims.size());
+        assertEquals(3, claims.size());
         assertEquals(adminId.toString(), claims.get("adminId"));
         assertNull(claims.get("name"));
     }
