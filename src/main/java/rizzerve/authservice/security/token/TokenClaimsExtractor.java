@@ -12,6 +12,7 @@ public class TokenClaimsExtractor {
             claims.put("adminId", admin.getId().toString());
         }
         claims.put("name", admin.getName());
+        claims.put("role", "ADMIN");
 
         return claims;
     }
