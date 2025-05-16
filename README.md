@@ -15,10 +15,10 @@
 ![content diagram auth](https://github.com/user-attachments/assets/9de882aa-a9b2-45e5-a28e-05d96773952f)
 
 - Code Diagram - Admin Authentication
-![image](https://github.com/user-attachments/assets/e910772b-7c93-4a08-a9fc-972709eecb65)
+![image](https://github.com/user-attachments/assets/5f22d546-2203-49bf-bbf8-de6af1220773)
 
 - Code Diagram - Customer Session
-![image](https://github.com/user-attachments/assets/58ceb030-7339-485e-9bcd-41081719614a)
+![image](https://github.com/user-attachments/assets/d334907c-2319-48d7-95db-6fc2e60927e8)
 
 - Code Diagram - Security Configuration
-![image](https://github.com/user-attachments/assets/cc285c17-057e-4a20-bfd7-cb584e05ad84)
+![image](https://github.com/user-attachments/assets/8b0fbbe7-9c9e-4534-a9d0-9b445d7b3534)
