@@ -15,7 +15,7 @@
 ![content diagram auth](https://github.com/user-attachments/assets/9de882aa-a9b2-45e5-a28e-05d96773952f)
 
 - Code Diagram - Admin Authentication
-![image](https://github.com/user-attachments/assets/5f22d546-2203-49bf-bbf8-de6af1220773)
+![image](https://github.com/user-attachments/assets/73b9f8a4-14c7-43d0-b96e-8fc044211389)
 
 - Code Diagram - Customer Session
 ![image](https://github.com/user-attachments/assets/d334907c-2319-48d7-95db-6fc2e60927e8)
