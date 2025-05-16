@@ -12,7 +12,7 @@
 
 # Individual (Muhammad Afwan Hafizh - 2306208855)
 - Component Diagram - Auth Service
-![image](https://github.com/user-attachments/assets/fe1b0fa0-a765-4e22-8151-8c19796968e5)
+![image](https://github.com/user-attachments/assets/0bc44b2b-9603-4349-a3aa-83c518ee3332)
 
 - Code Diagram - Admin Authentication
 ![image](https://github.com/user-attachments/assets/73b9f8a4-14c7-43d0-b96e-8fc044211389)
