@@ -10,15 +10,15 @@
 
 ---
 
-# Individual
-- Container Diagram - Auth Service
-![image](https://github.com/user-attachments/assets/bff38756-0fc4-4fb4-9eaf-5a395a6b70a6)
-
+# Individual (Muhammad Afwan Hafizh - 2306208855)
 - Component Diagram - Auth Service
 ![content diagram auth](https://github.com/user-attachments/assets/9de882aa-a9b2-45e5-a28e-05d96773952f)
 
-- Code Diagram - Auth Service
-![image](https://github.com/user-attachments/assets/da0022e1-da66-4a6f-8b2e-d2287c15dada)
+- Code Diagram - Admin Authentication
+![image](https://github.com/user-attachments/assets/e910772b-7c93-4a08-a9fc-972709eecb65)
 
-- Component Diagram - Integration Auth Service with Future Services
-![image](https://github.com/user-attachments/assets/0dabb591-4551-475e-b7d4-0421140a981d)
+- Code Diagram - Customer Session
+![image](https://github.com/user-attachments/assets/58ceb030-7339-485e-9bcd-41081719614a)
+
+- Code Diagram - Security Configuration
+![image](https://github.com/user-attachments/assets/cc285c17-057e-4a20-bfd7-cb584e05ad84)
