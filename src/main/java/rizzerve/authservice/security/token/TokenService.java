@@ -9,7 +9,4 @@ public interface TokenService {
     boolean validateToken(String token, UserDetails userDetails);
     String extractUsername(String token);
     UUID extractAdminId(String token);
-    String generateSessionToken(Integer tableNumber);
-    boolean validateSessionToken(String token);
-    Integer extractTableNumber(String token);
 }

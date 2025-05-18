@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rizzerve.authservice.dto.customer.CustomerSessionRequest;
-import rizzerve.authservice.dto.customer.CustomerSessionResponse;
 import rizzerve.authservice.dto.customer.EndSessionRequest;
 import rizzerve.authservice.exception.SessionNotFoundException;
 import rizzerve.authservice.exception.TableAlreadyOccupiedException;

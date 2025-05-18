@@ -6,7 +6,6 @@ import rizzerve.authservice.dto.admin.AdminLoginRequest;
 import rizzerve.authservice.dto.admin.AdminProfileResponse;
 import rizzerve.authservice.dto.admin.AdminRegisterRequest;
 import rizzerve.authservice.dto.customer.CustomerSessionRequest;
-import rizzerve.authservice.dto.customer.CustomerSessionResponse;
 import rizzerve.authservice.dto.customer.EndSessionRequest;
 import rizzerve.authservice.dto.dashboard.DashboardResponse;
 

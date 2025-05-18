@@ -9,9 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rizzerve.authservice.dto.customer.CustomerSessionRequest;
-import rizzerve.authservice.dto.customer.CustomerSessionResponse;
 import rizzerve.authservice.dto.customer.EndSessionRequest;
-import rizzerve.authservice.service.customer.CustomerSessionService;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
