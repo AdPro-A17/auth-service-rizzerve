@@ -7,10 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import rizzerve.authservice.client.TableServiceClient;
-import rizzerve.authservice.client.TableUpdateResponse;
 import rizzerve.authservice.security.token.TokenService;
-import rizzerve.authservice.client.TableAvailabilityResponse;
 
 import java.util.Map;
 

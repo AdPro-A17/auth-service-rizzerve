@@ -12,10 +12,7 @@ import rizzerve.authservice.dto.customer.EndSessionRequest;
 import rizzerve.authservice.exception.SessionNotFoundException;
 import rizzerve.authservice.exception.TableAlreadyOccupiedException;
 import rizzerve.authservice.exception.TableNotFoundException;
-import rizzerve.authservice.model.CustomerSession;
-import rizzerve.authservice.repository.CustomerSessionRepository;
 import rizzerve.authservice.security.token.TokenService;
-import rizzerve.authservice.service.integration.TableServiceIntegration;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

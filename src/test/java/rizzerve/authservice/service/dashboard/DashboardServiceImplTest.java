@@ -8,8 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rizzerve.authservice.dto.dashboard.DashboardResponse;
 import rizzerve.authservice.model.Admin;
-import rizzerve.authservice.model.CustomerSession;
-import rizzerve.authservice.repository.CustomerSessionRepository;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

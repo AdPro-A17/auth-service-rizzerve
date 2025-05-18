@@ -36,7 +36,6 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public String generateSessionToken(Integer tableNumber) {
-        // Generate a simple session token for customer
         return Jwts.builder()
                 .claim("tableNumber", tableNumber)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -98,8 +97,11 @@ public class JwtTokenService implements TokenService {
                 .getBody();
     }
 
+
+
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
+

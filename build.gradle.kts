@@ -52,7 +52,6 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     compileOnly("org.projectlombok:lombok")
 
