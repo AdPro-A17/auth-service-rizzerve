@@ -72,23 +72,6 @@ public class JwtTokenServiceTest {
     }
 
     @Test
-    void generateSessionToken_ShouldCreateValidToken() {
-        Integer tableNumber = 5;
-
-        String token = tokenService.generateSessionToken(tableNumber);
-
-        assertNotNull(token);
-
-        Claims parsedClaims = Jwts.parser()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        assertEquals(tableNumber, parsedClaims.get("tableNumber", Integer.class));
-    }
-
-    @Test
     void validateToken_ShouldReturnTrue_ForValidToken() {
         String token = Jwts.builder()
                 .setSubject(admin.getUsername())
@@ -121,34 +104,6 @@ public class JwtTokenServiceTest {
     }
 
     @Test
-    void validateSessionToken_ShouldReturnTrue_ForValidToken() {
-        String token = Jwts.builder()
-                .claim("tableNumber", 5)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        boolean isValid = tokenService.validateSessionToken(token);
-
-        assertTrue(isValid);
-    }
-
-    @Test
-    void validateSessionToken_ShouldReturnFalse_WhenTokenExpired() {
-        String token = Jwts.builder()
-                .claim("tableNumber", 5)
-                .setIssuedAt(new Date(System.currentTimeMillis() - 2 * jwtExpiration))
-                .setExpiration(new Date(System.currentTimeMillis() - jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        boolean isValid = tokenService.validateSessionToken(token);
-
-        assertFalse(isValid);
-    }
-
-    @Test
     void extractUsername_ShouldReturnUsername() {
         String token = Jwts.builder()
                 .setSubject(admin.getUsername())
@@ -175,20 +130,5 @@ public class JwtTokenServiceTest {
         UUID adminId = tokenService.extractAdminId(token);
 
         assertEquals(admin.getId(), adminId);
-    }
-
-    @Test
-    void extractTableNumber_ShouldReturnTableNumber() {
-        Integer tableNumber = 5;
-        String token = Jwts.builder()
-                .claim("tableNumber", tableNumber)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        Integer extractedTableNumber = tokenService.extractTableNumber(token);
-
-        assertEquals(tableNumber, extractedTableNumber);
     }
 }

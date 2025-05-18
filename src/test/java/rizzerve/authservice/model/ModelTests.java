@@ -39,38 +39,4 @@ public class ModelTests {
         assertTrue(admin.isCredentialsNonExpired());
         assertTrue(admin.isEnabled());
     }
-
-    @Test
-    void customerSessionModelTest() {
-        UUID id = UUID.randomUUID();
-        Integer tableNumber = 1;
-        String sessionToken = "test-session-token";
-        LocalDateTime startTime = LocalDateTime.now();
-        LocalDateTime endTime = startTime.plusHours(1);
-
-        CustomerSession session = CustomerSession.builder()
-                .id(id)
-                .tableNumber(tableNumber)
-                .sessionToken(sessionToken)
-                .startTime(startTime)
-                .endTime(endTime)
-                .active(true)
-                .build();
-
-        assertEquals(id, session.getId());
-        assertEquals(tableNumber, session.getTableNumber());
-        assertEquals(sessionToken, session.getSessionToken());
-        assertEquals(startTime, session.getStartTime());
-        assertEquals(endTime, session.getEndTime());
-        assertTrue(session.isActive());
-    }
-
-    @Test
-    void customerSessionPrePersistTest() {
-        CustomerSession session = new CustomerSession();
-        session.onCreate();
-
-        assertNotNull(session.getStartTime());
-        assertTrue(session.isActive());
-    }
 }

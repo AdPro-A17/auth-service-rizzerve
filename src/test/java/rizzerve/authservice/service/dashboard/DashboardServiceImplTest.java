@@ -21,14 +21,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class DashboardServiceImplTest {
 
-    @Mock
-    private CustomerSessionRepository customerSessionRepository;
-
     @InjectMocks
     private DashboardServiceImpl dashboardService;
 
     private Admin admin;
-    private List<CustomerSession> sessions;
 
     @BeforeEach
     void setUp() {
@@ -38,38 +34,10 @@ public class DashboardServiceImplTest {
                 .name("Test Admin")
                 .password("password")
                 .build();
-
-        CustomerSession activeSession1 = CustomerSession.builder()
-                .id(UUID.randomUUID())
-                .tableNumber(1)
-                .sessionToken("token1")
-                .startTime(LocalDateTime.now().minusHours(1))
-                .active(true)
-                .build();
-
-        CustomerSession activeSession2 = CustomerSession.builder()
-                .id(UUID.randomUUID())
-                .tableNumber(2)
-                .sessionToken("token2")
-                .startTime(LocalDateTime.now().minusMinutes(30))
-                .active(true)
-                .build();
-
-        CustomerSession inactiveSession = CustomerSession.builder()
-                .id(UUID.randomUUID())
-                .tableNumber(3)
-                .sessionToken("token3")
-                .startTime(LocalDateTime.now().minusHours(2))
-                .endTime(LocalDateTime.now().minusHours(1))
-                .active(false)
-                .build();
-
-        sessions = Arrays.asList(activeSession1, activeSession2, inactiveSession);
     }
 
     @Test
     void getDashboardData_ShouldReturnCorrectData() {
-        when(customerSessionRepository.findAll()).thenReturn(sessions);
 
         DashboardResponse response = dashboardService.getDashboardData(admin);
 
@@ -80,39 +48,6 @@ public class DashboardServiceImplTest {
 
         Map<String, Object> dashboardData = response.getDashboardData();
         assertNotNull(dashboardData);
-        assertEquals(2, dashboardData.get("activeSessions"));
-
-        List<Integer> activeTables = (List<Integer>) dashboardData.get("activeTables");
-        assertNotNull(activeTables);
-        assertEquals(2, activeTables.size());
-        assertTrue(activeTables.contains(1));
-        assertTrue(activeTables.contains(2));
-        assertFalse(activeTables.contains(3));
-    }
-
-    @Test
-    void getDashboardData_ShouldReturnEmptyData_WhenNoActiveSessions() {
-        CustomerSession inactiveSession = CustomerSession.builder()
-                .id(UUID.randomUUID())
-                .tableNumber(3)
-                .sessionToken("token3")
-                .startTime(LocalDateTime.now().minusHours(2))
-                .endTime(LocalDateTime.now().minusHours(1))
-                .active(false)
-                .build();
-
-        when(customerSessionRepository.findAll()).thenReturn(List.of(inactiveSession));
-
-        DashboardResponse response = dashboardService.getDashboardData(admin);
-
-        assertNotNull(response);
-
-        Map<String, Object> dashboardData = response.getDashboardData();
-        assertNotNull(dashboardData);
-        assertEquals(0, dashboardData.get("activeSessions"));
-
-        List<Integer> activeTables = (List<Integer>) dashboardData.get("activeTables");
-        assertNotNull(activeTables);
-        assertEquals(0, activeTables.size());
+        assertEquals(null, dashboardData.get("activeSessions"));
     }
 }
