@@ -1,8 +1,10 @@
 package rizzerve.authservice.service.admin;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import rizzerve.authservice.dto.admin.AdminAuthResponse;
 import rizzerve.authservice.dto.admin.AdminLoginRequest;
@@ -12,28 +14,52 @@ import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminAuthenticationServiceImpl implements AdminAuthenticationService {
+
     private final AdminRepository adminRepository;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
 
     @Override
     public AdminAuthResponse authenticateAdmin(AdminLoginRequest request) {
+        log.debug("Attempting authentication for admin: {}", request.getUsername());
+
+        try {
+            performAuthentication(request);
+            Admin admin = findAdminByUsername(request.getUsername());
+            String token = generateTokenForAdmin(admin);
+
+            log.info("Admin authentication successful for: {}", request.getUsername());
+            return buildAuthResponse(admin, token);
+
+        } catch (AuthenticationException e) {
+            log.warn("Authentication failed for admin: {}", request.getUsername());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during authentication for admin: {}", request.getUsername(), e);
+            throw new RuntimeException("Authentication failed", e);
+        }
+    }
+
+    private void performAuthentication(AdminLoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
+    }
 
-        Admin admin = adminRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
+    private Admin findAdminByUsername(String username) {
+        return adminRepository.findByUsername(username)
+                .orElseThrow(() -> new AdminNotFoundException("Admin not found: " + username));
+    }
 
-        String token = tokenService.generateToken(admin, TokenClaimsExtractor.extractAdminClaims(admin));
-
-        return buildAuthResponse(admin, token);
+    private String generateTokenForAdmin(Admin admin) {
+        return tokenService.generateToken(admin, TokenClaimsExtractor.extractAdminClaims(admin));
     }
 
     private AdminAuthResponse buildAuthResponse(Admin admin, String token) {

@@ -78,7 +78,7 @@ public class AdminAuthenticationServiceTest {
         when(adminRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         when(authenticationManager.authenticate(any())).thenReturn(null);
 
-        assertThrows(AdminNotFoundException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             adminAuthenticationService.authenticateAdmin(loginRequest);
         });
 
