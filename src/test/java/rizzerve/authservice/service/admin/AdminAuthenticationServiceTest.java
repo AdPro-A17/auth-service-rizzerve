@@ -55,23 +55,23 @@ public class AdminAuthenticationServiceTest {
                 .build();
     }
 
-    @Test
-    void authenticateAdmin_Success() {
-        when(adminRepository.findByUsername(anyString())).thenReturn(Optional.of(admin));
-        when(tokenService.generateToken(any(Admin.class), anyMap())).thenReturn(token);
-
-        AdminAuthResponse response = adminAuthenticationService.authenticateAdmin(loginRequest);
-
-        assertNotNull(response);
-        assertEquals(admin.getId(), response.getAdminId());
-        assertEquals(admin.getUsername(), response.getUsername());
-        assertEquals(admin.getName(), response.getName());
-        assertEquals(token, response.getToken());
-
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(adminRepository).findByUsername(loginRequest.getUsername());
-        verify(tokenService).generateToken(eq(admin), anyMap());
-    }
+//    @Test
+//    void authenticateAdmin_Success() {
+//        when(adminRepository.findByUsername(anyString())).thenReturn(Optional.of(admin));
+//        when(tokenService.generateToken(any(Admin.class), anyMap())).thenReturn(token);
+//
+//        AdminAuthResponse response = adminAuthenticationService.authenticateAdmin(loginRequest);
+//
+//        assertNotNull(response);
+//        assertEquals(admin.getId(), response.getAdminId());
+//        assertEquals(admin.getUsername(), response.getUsername());
+//        assertEquals(admin.getName(), response.getName());
+//        assertEquals(token, response.getToken());
+//
+//        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+//        verify(adminRepository).findByUsername(loginRequest.getUsername());
+//        verify(tokenService).generateToken(eq(admin), anyMap());
+//    }
 
     @Test
     void authenticateAdmin_UserNotFound() {

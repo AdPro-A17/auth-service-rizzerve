@@ -31,6 +31,8 @@ configurations {
 
 repositories {
     mavenCentral()
+    mavenLocal()
+    maven("https://repo.spring.io/release")
 }
 
 dependencyManagement {
@@ -41,22 +43,22 @@ dependencyManagement {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
+    implementation("io.micrometer:micrometer-core")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("org.postgresql:postgresql")
-
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
     compileOnly("org.projectlombok:lombok")
-
     testImplementation("com.h2database:h2")
-
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
