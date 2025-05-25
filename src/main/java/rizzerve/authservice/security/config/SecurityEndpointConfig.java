@@ -48,7 +48,9 @@ public class SecurityEndpointConfig {
                 "/api/auth/**",
                 "/api/customer/session/**",
                 "/h2-console/**",
-                "/api/table/**"
+                "/api/table/**",
+                "/api/orders/**",
+                "/api/checkouts/**"
         );
     }
 
