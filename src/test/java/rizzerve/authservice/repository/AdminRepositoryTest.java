@@ -3,58 +3,117 @@ package rizzerve.authservice.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import rizzerve.authservice.model.Admin;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class AdminRepositoryTest {
+class AdminRepositoryTest {
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Autowired
     private AdminRepository adminRepository;
 
     @Test
-    void findByUsernameShouldReturnAdmin() {
-        String username = "testadmin";
-        Admin admin = new Admin();
-        admin.setUsername(username);
-        admin.setName("Test Admin");
-        admin.setPassword("encodedPassword");
-        adminRepository.save(admin);
+    void testFindByUsername() {
+        // Given
+        Admin admin = Admin.builder()
+                .name("Test Admin")
+                .username("testadmin")
+                .password("password123")
+                .build();
+        entityManager.persistAndFlush(admin);
 
-        Optional<Admin> foundAdmin = adminRepository.findByUsername(username);
+        // When
+        Optional<Admin> result = adminRepository.findByUsername("testadmin");
 
-        assertTrue(foundAdmin.isPresent());
-        assertEquals(username, foundAdmin.get().getUsername());
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals("testadmin", result.get().getUsername());
+        assertEquals("Test Admin", result.get().getName());
     }
 
     @Test
-    void findByUsernameShouldReturnEmptyOptionalWhenNotFound() {
-        Optional<Admin> foundAdmin = adminRepository.findByUsername("nonexistent");
+    void testFindByUsernameNotFound() {
+        // When
+        Optional<Admin> result = adminRepository.findByUsername("nonexistent");
 
-        assertFalse(foundAdmin.isPresent());
+        // Then
+        assertFalse(result.isPresent());
     }
 
     @Test
-    void existsByUsernameShouldReturnTrueWhenExists() {
-        String username = "existinguser";
-        Admin admin = new Admin();
-        admin.setUsername(username);
-        admin.setName("Existing User");
-        admin.setPassword("encodedPassword");
-        adminRepository.save(admin);
+    void testExistsByUsername() {
+        // Given
+        Admin admin = Admin.builder()
+                .name("Test Admin")
+                .username("testadmin")
+                .password("password123")
+                .build();
+        entityManager.persistAndFlush(admin);
 
-        boolean exists = adminRepository.existsByUsername(username);
-
-        assertTrue(exists);
+        // When & Then
+        assertTrue(adminRepository.existsByUsername("testadmin"));
+        assertFalse(adminRepository.existsByUsername("nonexistent"));
     }
 
     @Test
-    void existsByUsernameShouldReturnFalseWhenNotExists() {
-        boolean exists = adminRepository.existsByUsername("nonexistent");
+    void testSaveAdmin() {
+        // Given
+        Admin admin = Admin.builder()
+                .name("New Admin")
+                .username("newadmin")
+                .password("password123")
+                .build();
 
-        assertFalse(exists);
+        // When
+        Admin savedAdmin = adminRepository.save(admin);
+
+        // Then
+        assertNotNull(savedAdmin.getId());
+        assertEquals("New Admin", savedAdmin.getName());
+        assertEquals("newadmin", savedAdmin.getUsername());
+    }
+
+    @Test
+    void testFindById() {
+        // Given
+        Admin admin = Admin.builder()
+                .name("Test Admin")
+                .username("testadmin")
+                .password("password123")
+                .build();
+        Admin savedAdmin = entityManager.persistAndFlush(admin);
+
+        // When
+        Optional<Admin> result = adminRepository.findById(savedAdmin.getId());
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(savedAdmin.getId(), result.get().getId());
+    }
+
+    @Test
+    void testDeleteAdmin() {
+        // Given
+        Admin admin = Admin.builder()
+                .name("Test Admin")
+                .username("testadmin")
+                .password("password123")
+                .build();
+        Admin savedAdmin = entityManager.persistAndFlush(admin);
+
+        // When
+        adminRepository.deleteById(savedAdmin.getId());
+
+        // Then
+        Optional<Admin> result = adminRepository.findById(savedAdmin.getId());
+        assertFalse(result.isPresent());
     }
 }

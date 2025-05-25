@@ -2,13 +2,20 @@ package rizzerve.authservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.ApplicationContext;
 
-@ActiveProfiles("test")
-@SpringBootTest(classes = AuthServiceApplication.class)
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
 class AuthServiceApplicationTests {
 
     @Test
-    void contextLoads() {
+    void contextLoads(ApplicationContext context) {
+        assertNotNull(context, "Application context should load");
+    }
+
+    @Test
+    void mainMethodStartsApplication() {
+        AuthServiceApplication.main(new String[]{});
     }
 }
