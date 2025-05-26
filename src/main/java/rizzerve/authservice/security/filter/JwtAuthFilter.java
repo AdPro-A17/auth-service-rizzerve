@@ -22,7 +22,6 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
-    private final AdminTokenService adminTokenService;
 
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -40,12 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String jwt = extractJwtFromHeader(authHeader);
-
-        if (adminTokenService.isTokenBlacklisted(jwt)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         final String username = tokenService.extractUsername(jwt);
 
         if (username != null && isAuthenticationRequired()) {
