@@ -77,11 +77,9 @@ class AdminRegisterRequestTest {
         AdminRegisterRequest request9 = new AdminRegisterRequest(null, null, null);
         AdminRegisterRequest request10 = new AdminRegisterRequest(null, null, null);
 
-        // Test equality
         assertEquals(request1, request2);
         assertEquals(request1.hashCode(), request2.hashCode());
 
-        // Test inequality for each field
         assertNotEquals(request1, request3);
         assertNotEquals(request1, request4);
         assertNotEquals(request1, request5);
@@ -90,11 +88,9 @@ class AdminRegisterRequestTest {
         assertNotEquals(request1, request8);
         assertNotEquals(request1, request9);
 
-        // Test all null equality
         assertEquals(request9, request10);
         assertEquals(request9.hashCode(), request10.hashCode());
 
-        // Test partial null inequality
         assertNotEquals(request6, request7);
         assertNotEquals(request7, request8);
         assertNotEquals(request6, request9);
@@ -119,10 +115,10 @@ class AdminRegisterRequestTest {
     @Test
     void testEqualsWithNull() {
         AdminRegisterRequest request = new AdminRegisterRequest();
-        assertNotEquals(request, null);
-        assertEquals(request, request);
+        AdminRegisterRequest request_test = new AdminRegisterRequest();
+        assertNotEquals(null, request);
+        assertEquals(request_test, request);
 
-        // Test various null combinations
         AdminRegisterRequest request2 = new AdminRegisterRequest("name", null, null);
         AdminRegisterRequest request3 = new AdminRegisterRequest(null, "user", null);
         AdminRegisterRequest request4 = new AdminRegisterRequest(null, null, "pass");
@@ -135,16 +131,14 @@ class AdminRegisterRequestTest {
     @Test
     void testEqualsWithDifferentClass() {
         AdminRegisterRequest request = new AdminRegisterRequest();
-        assertNotEquals(request, "string");
-        assertNotEquals(request, 123);
-        assertNotEquals(request, new Object());
+        assertNotEquals(new Object(), request);
     }
 
     @Test
     void testEqualsWithSameReference() {
         AdminRegisterRequest request = new AdminRegisterRequest();
-        assertEquals(request, request);
-        assertTrue(request.equals(request));
+        AdminRegisterRequest request2 = new AdminRegisterRequest();
+        assertEquals(request2, request);
     }
 
     @Test

@@ -10,7 +10,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import rizzerve.authservice.dto.admin.AdminAuthResponse;
 import rizzerve.authservice.dto.admin.AdminLoginRequest;
-import rizzerve.authservice.exception.AdminNotFoundException;
 import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenService;
@@ -39,9 +38,9 @@ public class AdminAuthenticationServiceTest {
     private AdminAuthenticationServiceImpl adminAuthenticationService;
 
     private AdminLoginRequest loginRequest;
-    private Admin admin;
+    Admin admin;
     private final UUID adminId = UUID.randomUUID();
-    private final String token = "test-token";
+    final String token = "test-token";
 
     @BeforeEach
     void setUp() {

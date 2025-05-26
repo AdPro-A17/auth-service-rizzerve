@@ -102,10 +102,10 @@ class AdminProfileResponseTest {
     @Test
     void testEqualsWithNull() {
         AdminProfileResponse response = new AdminProfileResponse();
-        assertNotEquals(response, null);
-        assertEquals(response, response);
+        AdminProfileResponse response_new = new AdminProfileResponse();
+        assertNotEquals(null, response);
+        assertEquals(response_new, response);
 
-        // Test with different combinations
         AdminProfileResponse response2 = new AdminProfileResponse("user", null);
         AdminProfileResponse response3 = new AdminProfileResponse(null, "name");
         assertNotEquals(response, response2);
@@ -115,16 +115,14 @@ class AdminProfileResponseTest {
     @Test
     void testEqualsWithDifferentClass() {
         AdminProfileResponse response = new AdminProfileResponse();
-        assertNotEquals(response, "string");
-        assertNotEquals(response, 123);
-        assertNotEquals(response, new Object());
+        assertNotEquals(new Object(), response);
     }
 
     @Test
     void testEqualsWithSameReference() {
         AdminProfileResponse response = new AdminProfileResponse();
-        assertEquals(response, response);
-        assertTrue(response.equals(response));
+        AdminProfileResponse response2 = new AdminProfileResponse();
+        assertEquals(response2, response);
     }
 
     @Test

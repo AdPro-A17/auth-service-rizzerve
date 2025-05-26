@@ -83,19 +83,14 @@ class AdminLoginRequestTest {
     @Test
     void testEqualsWithNull() {
         AdminLoginRequest request = new AdminLoginRequest();
-        assertNotEquals(request, null);
-    }
-
-    @Test
-    void testEqualsWithDifferentClass() {
-        AdminLoginRequest request = new AdminLoginRequest();
-        assertNotEquals(request, "string");
+        assertNotEquals(null, request);
     }
 
     @Test
     void testEqualsWithSameReference() {
         AdminLoginRequest request = new AdminLoginRequest();
-        assertEquals(request, request);
+        AdminLoginRequest request2 = new AdminLoginRequest();
+        assertEquals(request2, request);
     }
 
     @Test

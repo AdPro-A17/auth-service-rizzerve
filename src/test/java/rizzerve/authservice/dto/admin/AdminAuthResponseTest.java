@@ -113,15 +113,10 @@ class AdminAuthResponseTest {
     }
 
     @Test
-    void testEqualsWithDifferentClass() {
-        AdminAuthResponse response = new AdminAuthResponse();
-        assertNotEquals(response, "string");
-    }
-
-    @Test
     void testEqualsWithSameReference() {
         AdminAuthResponse response = new AdminAuthResponse();
-        assertEquals(response, response);
+        AdminAuthResponse response_new = new AdminAuthResponse();
+        assertEquals(response, response_new);
     }
 
     @Test

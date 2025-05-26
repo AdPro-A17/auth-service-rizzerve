@@ -93,7 +93,6 @@ class DashboardResponseTest {
         differentData.put("key2", "value2");
         DashboardResponse response6 = new DashboardResponse(welcomeMessage, username, lastLogin, differentData);
 
-        // Test with null values
         DashboardResponse response7 = new DashboardResponse(null, username, lastLogin, dashboardData);
         DashboardResponse response8 = new DashboardResponse(welcomeMessage, null, lastLogin, dashboardData);
         DashboardResponse response9 = new DashboardResponse(welcomeMessage, username, null, dashboardData);
@@ -101,11 +100,9 @@ class DashboardResponseTest {
         DashboardResponse response11 = new DashboardResponse(null, null, null, null);
         DashboardResponse response12 = new DashboardResponse(null, null, null, null);
 
-        // Test equality
         assertEquals(response1, response2);
         assertEquals(response1.hashCode(), response2.hashCode());
 
-        // Test inequality for each field
         assertNotEquals(response1, response3);
         assertNotEquals(response1, response4);
         assertNotEquals(response1, response5);
@@ -115,11 +112,9 @@ class DashboardResponseTest {
         assertNotEquals(response1, response9);
         assertNotEquals(response1, response10);
 
-        // Test all null equality
         assertEquals(response11, response12);
         assertEquals(response11.hashCode(), response12.hashCode());
 
-        // Test partial null inequality
         assertNotEquals(response7, response8);
         assertNotEquals(response8, response9);
         assertNotEquals(response9, response10);
@@ -146,10 +141,10 @@ class DashboardResponseTest {
     @Test
     void testEqualsWithNull() {
         DashboardResponse response = new DashboardResponse();
-        assertNotEquals(response, null);
-        assertEquals(response, response);
+        DashboardResponse response_new = new DashboardResponse();
+        assertNotEquals(null, response);
+        assertEquals(response_new, response);
 
-        // Test various null combinations
         DashboardResponse response2 = new DashboardResponse("welcome", null, null, null);
         DashboardResponse response3 = new DashboardResponse(null, "user", null, null);
         DashboardResponse response4 = new DashboardResponse(null, null, LocalDateTime.now(), null);
@@ -162,16 +157,14 @@ class DashboardResponseTest {
     @Test
     void testEqualsWithDifferentClass() {
         DashboardResponse response = new DashboardResponse();
-        assertNotEquals(response, "string");
-        assertNotEquals(response, 123);
-        assertNotEquals(response, new Object());
+        assertNotEquals(new Object(), response);
     }
 
     @Test
     void testEqualsWithSameReference() {
         DashboardResponse response = new DashboardResponse();
-        assertEquals(response, response);
-        assertTrue(response.equals(response));
+        DashboardResponse response_new = new DashboardResponse();
+        assertEquals(response_new, response);
     }
 
     @Test

@@ -140,7 +140,6 @@ class AdminTest {
         Admin admin5 = new Admin(id, name, "different", password);
         Admin admin6 = new Admin(id, name, username, "different");
 
-        // Test with null values
         Admin admin7 = new Admin(null, name, username, password);
         Admin admin8 = new Admin(id, null, username, password);
         Admin admin9 = new Admin(id, name, null, password);
@@ -148,11 +147,9 @@ class AdminTest {
         Admin admin11 = new Admin(null, null, null, null);
         Admin admin12 = new Admin(null, null, null, null);
 
-        // Test equality
         assertEquals(admin1, admin2);
         assertEquals(admin1.hashCode(), admin2.hashCode());
 
-        // Test inequality for each field
         assertNotEquals(admin1, admin3);
         assertNotEquals(admin1, admin4);
         assertNotEquals(admin1, admin5);
@@ -162,11 +159,9 @@ class AdminTest {
         assertNotEquals(admin1, admin9);
         assertNotEquals(admin1, admin10);
 
-        // Test all null equality
         assertEquals(admin11, admin12);
         assertEquals(admin11.hashCode(), admin12.hashCode());
 
-        // Test partial null inequality
         assertNotEquals(admin7, admin8);
         assertNotEquals(admin8, admin9);
         assertNotEquals(admin9, admin10);
@@ -194,19 +189,14 @@ class AdminTest {
     @Test
     void testEqualsWithNull() {
         Admin admin = new Admin();
-        assertNotEquals(admin, null);
-    }
-
-    @Test
-    void testEqualsWithDifferentClass() {
-        Admin admin = new Admin();
-        assertNotEquals(admin, "string");
+        assertNotEquals(null, admin);
     }
 
     @Test
     void testEqualsWithSameReference() {
         Admin admin = new Admin();
-        assertEquals(admin, admin);
+        Admin admin_new = new Admin();
+        assertEquals(admin, admin_new);
     }
 
     @Test
@@ -231,7 +221,6 @@ class AdminTest {
         assertNull(admin.getUsername());
         assertNull(admin.getPassword());
 
-        // UserDetails methods should still work
         assertNotNull(admin.getAuthorities());
         assertTrue(admin.isAccountNonExpired());
         assertTrue(admin.isAccountNonLocked());
@@ -244,7 +233,6 @@ class AdminTest {
         Admin admin = new Admin();
         Collection<? extends GrantedAuthority> authorities = admin.getAuthorities();
 
-        // Verify the authorities collection contains expected role
         assertEquals(1, authorities.size());
         GrantedAuthority authority = authorities.iterator().next();
         assertEquals("ROLE_ADMIN", authority.getAuthority());

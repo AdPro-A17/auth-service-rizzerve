@@ -2,7 +2,7 @@ package rizzerve.authservice.security.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,9 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import rizzerve.authservice.model.Admin;
-import io.jsonwebtoken.io.Decoders;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +27,10 @@ public class JwtTokenServiceTest {
     @InjectMocks
     private JwtTokenService tokenService;
 
-    private String secretKey;
+    String secretKey;
     private long jwtExpiration;
     private Admin admin;
-    private Key signingKey;
+    private SecretKey signingKey;
 
     @BeforeEach
     void setUp() {
@@ -61,10 +61,10 @@ public class JwtTokenServiceTest {
         assertNotNull(token);
 
         Claims parsedClaims = Jwts.parser()
-                .setSigningKey(signingKey)
+                .verifyWith(signingKey)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
 
         assertEquals(admin.getUsername(), parsedClaims.getSubject());
         assertEquals(admin.getId().toString(), parsedClaims.get("adminId", String.class));
@@ -73,11 +73,13 @@ public class JwtTokenServiceTest {
 
     @Test
     void validateToken_ShouldReturnTrue_ForValidToken() {
+        Instant now = Instant.now();
+
         String token = Jwts.builder()
-                .setSubject(admin.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .subject(admin.getUsername())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(jwtExpiration)))
+                .signWith(signingKey)
                 .compact();
 
         boolean isValid = tokenService.validateToken(token, admin);
@@ -91,11 +93,13 @@ public class JwtTokenServiceTest {
                 .username("other-admin")
                 .build();
 
+        Instant now = Instant.now();
+
         String token = Jwts.builder()
-                .setSubject(admin.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .subject(admin.getUsername())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(jwtExpiration)))
+                .signWith(signingKey)
                 .compact();
 
         boolean isValid = tokenService.validateToken(token, otherAdmin);
@@ -105,11 +109,13 @@ public class JwtTokenServiceTest {
 
     @Test
     void extractUsername_ShouldReturnUsername() {
+        Instant now = Instant.now();
+
         String token = Jwts.builder()
-                .setSubject(admin.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .subject(admin.getUsername())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(jwtExpiration)))
+                .signWith(signingKey)
                 .compact();
 
         String username = tokenService.extractUsername(token);
@@ -119,12 +125,14 @@ public class JwtTokenServiceTest {
 
     @Test
     void extractAdminId_ShouldReturnAdminId() {
+        Instant now = Instant.now();
+
         String token = Jwts.builder()
-                .setSubject(admin.getUsername())
+                .subject(admin.getUsername())
                 .claim("adminId", admin.getId().toString())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(jwtExpiration)))
+                .signWith(signingKey)
                 .compact();
 
         UUID adminId = tokenService.extractAdminId(token);

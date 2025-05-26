@@ -38,7 +38,7 @@ public class AdminRegistrationServiceTest {
     private AdminRegisterRequest registerRequest;
     private Admin savedAdmin;
     private final UUID adminId = UUID.randomUUID();
-    private final String token = "test-token";
+    final String token = "test-token";
     private final String encodedPassword = "encodedPassword";
 
     @BeforeEach
@@ -78,9 +78,9 @@ public class AdminRegistrationServiceTest {
     void registerAdmin_UsernameExists() {
         when(adminRepository.existsByUsername(anyString())).thenReturn(true);
 
-        assertThrows(AdminAlreadyExistsException.class, () -> {
-            adminRegistrationService.registerAdmin(registerRequest);
-        });
+        assertThrows(AdminAlreadyExistsException.class, () ->
+                adminRegistrationService.registerAdmin(registerRequest)
+        );
 
         verify(adminRepository).existsByUsername(registerRequest.getUsername());
         verify(passwordEncoder, never()).encode(anyString());
