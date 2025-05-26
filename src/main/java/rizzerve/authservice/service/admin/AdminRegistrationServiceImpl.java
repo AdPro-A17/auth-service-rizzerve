@@ -10,6 +10,7 @@ import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
+import io.micrometer.core.annotation.Timed;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
     private final TokenService tokenService;
 
     @Override
+    @Timed(value = "auth.registration.duration", description = "Time taken for admin registration")
     public AdminAuthResponse registerAdmin(AdminRegisterRequest request) {
         if(adminRepository.existsByUsername(request.getUsername())) {
             throw new AdminAlreadyExistsException("Username already exists");

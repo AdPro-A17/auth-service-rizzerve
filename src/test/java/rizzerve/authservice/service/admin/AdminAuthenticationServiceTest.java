@@ -1,30 +1,34 @@
 package rizzerve.authservice.service.admin;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import rizzerve.authservice.dto.admin.AdminAuthResponse;
 import rizzerve.authservice.dto.admin.AdminLoginRequest;
-import rizzerve.authservice.exception.AdminNotFoundException;
 import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.repository.AdminRepository;
+import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AdminAuthenticationServiceTest {
+class AdminAuthenticationServiceTest {
 
     @Mock
     private AdminRepository adminRepository;
@@ -38,52 +42,76 @@ public class AdminAuthenticationServiceTest {
     @InjectMocks
     private AdminAuthenticationServiceImpl adminAuthenticationService;
 
-    private AdminLoginRequest loginRequest;
     private Admin admin;
-    private final UUID adminId = UUID.randomUUID();
-    private final String token = "test-token";
+    private AdminLoginRequest loginRequest;
+    private String token;
+    private Map<String, Object> claims;
 
     @BeforeEach
     void setUp() {
-        loginRequest = new AdminLoginRequest("testuser", "password");
-
         admin = Admin.builder()
-                .id(adminId)
-                .username("testuser")
-                .name("Test User")
-                .password("hashedPassword")
+                .id(UUID.randomUUID())
+                .username("testadmin")
+                .name("Test Admin")
+                .password("password")
                 .build();
+
+        loginRequest = AdminLoginRequest.builder()
+                .username("testadmin")
+                .password("password")
+                .build();
+
+        token = "test.jwt.token";
+        claims = TokenClaimsExtractor.extractAdminClaims(admin);
     }
 
-    @Test
-    void authenticateAdmin_Success() {
-        when(adminRepository.findByUsername(anyString())).thenReturn(Optional.of(admin));
-        when(tokenService.generateToken(any(Admin.class), anyMap())).thenReturn(token);
+    @Nested
+    @DisplayName("authenticateAdmin method tests")
+    class AuthenticateAdminTests {
 
-        AdminAuthResponse response = adminAuthenticationService.authenticateAdmin(loginRequest);
+        @Test
+        @DisplayName("Should successfully authenticate admin and return response")
+        void authenticateAdmin_Success() {
+            when(adminRepository.findByUsername(loginRequest.getUsername()))
+                    .thenReturn(Optional.of(admin));
+            when(tokenService.generateToken(admin, claims))
+                    .thenReturn(token);
 
-        assertNotNull(response);
-        assertEquals(admin.getId(), response.getAdminId());
-        assertEquals(admin.getUsername(), response.getUsername());
-        assertEquals(admin.getName(), response.getName());
-        assertEquals(token, response.getToken());
+            AdminAuthResponse response = adminAuthenticationService.authenticateAdmin(loginRequest);
 
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(adminRepository).findByUsername(loginRequest.getUsername());
-        verify(tokenService).generateToken(eq(admin), anyMap());
-    }
+            assertNotNull(response);
+            assertEquals(token, response.getToken());
+            assertEquals(admin.getId(), response.getAdminId());
+            assertEquals(admin.getUsername(), response.getUsername());
+            assertEquals(admin.getName(), response.getName());
 
-    @Test
-    void authenticateAdmin_UserNotFound() {
-        when(adminRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        when(authenticationManager.authenticate(any())).thenReturn(null);
+            verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        }
 
-        assertThrows(AdminNotFoundException.class, () -> {
-            adminAuthenticationService.authenticateAdmin(loginRequest);
-        });
+        @Test
+        @DisplayName("Should throw BadCredentialsException when authentication fails")
+        void authenticateAdmin_AuthenticationFailure() {
+            when(authenticationManager.authenticate(any()))
+                    .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(adminRepository).findByUsername(loginRequest.getUsername());
-        verify(tokenService, never()).generateToken(any(), anyMap());
+            AuthenticationException exception = assertThrows(BadCredentialsException.class, () ->
+                    adminAuthenticationService.authenticateAdmin(loginRequest)
+            );
+
+            assertEquals("Invalid credentials", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should handle unexpected exceptions during authentication")
+        void authenticateAdmin_UnexpectedError() {
+            when(authenticationManager.authenticate(any()))
+                    .thenThrow(new RuntimeException("Unexpected error"));
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                    adminAuthenticationService.authenticateAdmin(loginRequest)
+            );
+
+            assertEquals("Authentication failed", exception.getMessage());
+        }
     }
 }

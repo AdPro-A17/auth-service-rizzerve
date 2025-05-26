@@ -15,46 +15,37 @@ import java.util.List;
 public class SecurityEndpointConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final SecurityCorsConfig corsConfig;
+    private final SecurityAuthProviderConfig authConfig;
+
+    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/api/auth/**",
+            "/api/customer/session/**",
+            "/h2-console/**",
+            "/api/table/**",
+            "/api/orders/**",
+            "/api/checkouts/**"
+    );
+
+    private static final List<String> ADMIN_ENDPOINTS = List.of("/api/admin/**");
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   SecurityCorsConfig corsConfig,
-                                                   SecurityAuthProviderConfig authConfig) throws Exception {
-        http
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(
                         authConfig.getSessionCreationPolicy()))
                 .authenticationProvider(authConfig.authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        configureAuthorization(http);
-
-        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
-
-        return http.build();
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(this::configureAuthorization)
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+                .build();
     }
 
-    private void configureAuthorization(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(getPublicEndpoints().toArray(new String[0])).permitAll()
-                .requestMatchers(getAdminEndpoints().toArray(new String[0])).hasAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated()
-        );
-    }
-
-    protected List<String> getPublicEndpoints() {
-        return List.of(
-                "/api/auth/**",
-                "/api/customer/session/**",
-                "/h2-console/**",
-                "/api/table/**",
-                "/api/orders/**",
-                "/api/checkouts/**"
-        );
-    }
-
-    protected List<String> getAdminEndpoints() {
-        return List.of("/api/admin/**");
+    private void configureAuthorization(org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
+        auth.requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
+                .requestMatchers(ADMIN_ENDPOINTS.toArray(new String[0])).hasAuthority("ROLE_ADMIN")
+                .anyRequest().authenticated();
     }
 }

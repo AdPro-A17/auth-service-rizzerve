@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TokenClaimsExtractorTest {
+class TokenClaimsExtractorTest {
 
     @Test
     void extractAdminClaims_withValidAdmin_shouldReturnCorrectClaims() {

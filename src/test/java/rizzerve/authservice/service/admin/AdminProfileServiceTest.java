@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class AdminProfileServiceTest {
+class AdminProfileServiceTest {
 
     @InjectMocks
     private AdminProfileServiceImpl adminProfileService;
