@@ -26,7 +26,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,16 +76,13 @@ class AdminAuthenticationServiceTest {
         @Test
         @DisplayName("Should successfully authenticate admin and return response")
         void authenticateAdmin_Success() {
-            // Arrange
             when(adminRepository.findByUsername(loginRequest.getUsername()))
                     .thenReturn(Optional.of(admin));
-            when(tokenService.generateToken(eq(admin), eq(claims)))
+            when(tokenService.generateToken(admin, claims))
                     .thenReturn(token);
 
-            // Act
             AdminAuthResponse response = adminAuthenticationService.authenticateAdmin(loginRequest);
 
-            // Assert
             assertNotNull(response);
             assertEquals(token, response.getToken());
             assertEquals(admin.getId(), response.getAdminId());

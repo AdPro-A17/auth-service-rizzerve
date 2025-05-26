@@ -9,7 +9,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class SecurityConfigsTest {
+class SecurityConfigsTest {
 
     @Autowired
     private SecurityAuthProviderConfig authProviderConfig;

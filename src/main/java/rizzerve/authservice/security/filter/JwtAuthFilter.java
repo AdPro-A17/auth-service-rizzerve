@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import rizzerve.authservice.security.token.TokenService;
+import rizzerve.authservice.service.admin.AdminTokenService;
 
 import java.io.IOException;
 
@@ -22,6 +23,7 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
+    private final AdminTokenService adminTokenService;
 
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -39,6 +41,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String jwt = extractJwtFromHeader(authHeader);
+
+        if (adminTokenService.isTokenBlacklisted(jwt)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String username = tokenService.extractUsername(jwt);
 
         if (username != null && isAuthenticationRequired()) {
