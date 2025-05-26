@@ -1,11 +1,8 @@
-global:
-  scrape_interval: 60s
-remote_write:
-  - url: https://prometheus-prod-52-prod-ap-southeast-2.grafana.net/api/prom/push
-    basic_auth:
-      username: "${GRAFANA_USERNAME}"
-      password: "${GRAFANA_PASSWORD}"
 scrape_configs:
-  - job_name: node
+  - job_name: 'MyAppMetrics'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 3s
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ['host.docker.internal:8080']
+        labels:
+          application: 'My Spring Boot Application'
