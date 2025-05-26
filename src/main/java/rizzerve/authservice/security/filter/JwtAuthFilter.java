@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import rizzerve.authservice.monitoring.service.MetricsService;
 import rizzerve.authservice.security.token.TokenService;
 import rizzerve.authservice.service.admin.AdminTokenService;
 
@@ -24,7 +23,6 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
-    private final MetricsService metricsService;
     private final AdminTokenService adminTokenService;
 
     private static final String BEARER_PREFIX = "Bearer ";
@@ -74,7 +72,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         boolean isValid = tokenService.validateToken(jwt, userDetails);
-        metricsService.recordTokenValidation(isValid);
 
         if (isValid) {
             UsernamePasswordAuthenticationToken authToken = createAuthenticationToken(userDetails);

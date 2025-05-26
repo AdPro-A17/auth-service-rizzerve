@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.2.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
+    id("de.undercouch.download") version "5.3.0"
 }
 
 sonar {
@@ -57,8 +58,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("io.micrometer:micrometer-registry-prometheus")
 
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")

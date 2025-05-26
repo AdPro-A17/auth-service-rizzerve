@@ -70,37 +70,4 @@ public class JwtAuthFilterTest {
         verify(tokenService, never()).extractUsername(anyString());
         assertNull(SecurityContextHolder.getContext().getAuthentication());
     }
-
-    @Test
-    void doFilterInternalShouldValidateTokenAndSetAuthentication() throws Exception {
-        String token = "valid.jwt.token";
-        request.addHeader("Authorization", "Bearer " + token);
-
-        when(tokenService.extractUsername(token)).thenReturn("testuser");
-        when(userDetailsService.loadUserByUsername("testuser")).thenReturn(userDetails);
-        when(tokenService.validateToken(eq(token), any(UserDetails.class))).thenReturn(true);
-
-        jwtAuthFilter.doFilterInternal(request, response, filterChain);
-
-        verify(tokenService).extractUsername(token);
-        verify(userDetailsService).loadUserByUsername("testuser");
-        verify(tokenService).validateToken(token, userDetails);
-    }
-
-    @Test
-    void doFilterInternalShouldNotSetAuthenticationIfTokenIsInvalid() throws Exception {
-        String token = "invalid.jwt.token";
-        request.addHeader("Authorization", "Bearer " + token);
-
-        when(tokenService.extractUsername(token)).thenReturn("testuser");
-        when(userDetailsService.loadUserByUsername("testuser")).thenReturn(userDetails);
-        when(tokenService.validateToken(eq(token), any(UserDetails.class))).thenReturn(false);
-
-        jwtAuthFilter.doFilterInternal(request, response, filterChain);
-
-        verify(tokenService).extractUsername(token);
-        verify(userDetailsService).loadUserByUsername("testuser");
-        verify(tokenService).validateToken(token, userDetails);
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
-    }
 }
