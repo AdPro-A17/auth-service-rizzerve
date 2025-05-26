@@ -102,9 +102,9 @@ class AdminProfileResponseTest {
     @Test
     void testEqualsWithNull() {
         AdminProfileResponse response = new AdminProfileResponse();
-        AdminProfileResponse response_new = new AdminProfileResponse();
+        AdminProfileResponse responseNew = new AdminProfileResponse();
         assertNotEquals(null, response);
-        assertEquals(response_new, response);
+        assertEquals(responseNew, response);
 
         AdminProfileResponse response2 = new AdminProfileResponse("user", null);
         AdminProfileResponse response3 = new AdminProfileResponse(null, "name");

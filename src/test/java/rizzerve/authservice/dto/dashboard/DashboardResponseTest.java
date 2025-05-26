@@ -141,9 +141,9 @@ class DashboardResponseTest {
     @Test
     void testEqualsWithNull() {
         DashboardResponse response = new DashboardResponse();
-        DashboardResponse response_new = new DashboardResponse();
+        DashboardResponse responseTest = new DashboardResponse();
         assertNotEquals(null, response);
-        assertEquals(response_new, response);
+        assertEquals(responseTest, response);
 
         DashboardResponse response2 = new DashboardResponse("welcome", null, null, null);
         DashboardResponse response3 = new DashboardResponse(null, "user", null, null);
@@ -163,8 +163,8 @@ class DashboardResponseTest {
     @Test
     void testEqualsWithSameReference() {
         DashboardResponse response = new DashboardResponse();
-        DashboardResponse response_new = new DashboardResponse();
-        assertEquals(response_new, response);
+        DashboardResponse responseTest = new DashboardResponse();
+        assertEquals(responseTest, response);
     }
 
     @Test

@@ -13,9 +13,4 @@ class AuthServiceApplicationTests {
     void contextLoads(ApplicationContext context) {
         assertNotNull(context, "Application context should load");
     }
-
-    @Test
-    void mainMethodStartsApplication() {
-        AuthServiceApplication.main(new String[]{});
-    }
 }

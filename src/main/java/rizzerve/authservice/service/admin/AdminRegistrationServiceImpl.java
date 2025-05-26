@@ -34,7 +34,6 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
         String token = tokenService.generateToken(savedAdmin,
                 TokenClaimsExtractor.extractAdminClaims(savedAdmin));
 
-        // Record registration metric
         metricsService.recordRegistration(request.getUsername());
 
         return buildAuthResponse(savedAdmin, token);

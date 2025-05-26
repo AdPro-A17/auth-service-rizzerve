@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MetricsService {
-
+    
+    private static final String USERNAME = "username";
+    
     private final MeterRegistry meterRegistry;
 
     private static final String AUTH_SUCCESS_COUNTER = "auth.login.success.total";
@@ -22,7 +24,7 @@ public class MetricsService {
     public void recordSuccessfulLogin(String username) {
         Counter.builder(AUTH_SUCCESS_COUNTER)
                 .description("Number of successful login attempts")
-                .tag("username", username)
+                .tag(USERNAME, username)
                 .register(meterRegistry)
                 .increment();
     }
@@ -30,7 +32,7 @@ public class MetricsService {
     public void recordFailedLogin(String username, String reason) {
         Counter.builder(AUTH_FAILURE_COUNTER)
                 .description("Number of failed login attempts")
-                .tag("username", username)
+                .tag(USERNAME, username)
                 .tag("failure_reason", reason)
                 .register(meterRegistry)
                 .increment();
@@ -39,7 +41,7 @@ public class MetricsService {
     public void recordRegistration(String username) {
         Counter.builder(REGISTRATION_COUNTER)
                 .description("Number of admin registrations")
-                .tag("username", username)
+                .tag(USERNAME, username)
                 .register(meterRegistry)
                 .increment();
     }
@@ -58,7 +60,7 @@ public class MetricsService {
     public void recordDashboardAccess(String username) {
         Counter.builder(DASHBOARD_ACCESS_COUNTER)
                 .description("Number of dashboard access attempts")
-                .tag("username", username)
+                .tag(USERNAME, username)
                 .register(meterRegistry)
                 .increment();
     }

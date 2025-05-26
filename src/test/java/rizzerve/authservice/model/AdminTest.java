@@ -195,8 +195,8 @@ class AdminTest {
     @Test
     void testEqualsWithSameReference() {
         Admin admin = new Admin();
-        Admin admin_new = new Admin();
-        assertEquals(admin, admin_new);
+        Admin adminTest = new Admin();
+        assertEquals(admin, adminTest);
     }
 
     @Test

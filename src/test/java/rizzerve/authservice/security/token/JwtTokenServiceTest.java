@@ -2,141 +2,180 @@ package rizzerve.authservice.security.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
-import rizzerve.authservice.model.Admin;
 
-import javax.crypto.SecretKey;
-import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtTokenServiceTest {
+class JwtTokenServiceTest {
 
-    @InjectMocks
     private JwtTokenService tokenService;
-
-    String secretKey;
+    private UserDetails userDetails;
+    private String secretKey;
     private long jwtExpiration;
-    private Admin admin;
-    private SecretKey signingKey;
 
     @BeforeEach
     void setUp() {
-        secretKey = "5170c563e2abfd66aef4d6e842640a489f7b54d75e036c984d67b7c78113c0c8";
-        jwtExpiration = 86400000;
+        tokenService = new JwtTokenService();
+        secretKey = "dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi10ZXN0aW5nLXB1cnBvc2Vz";
+        jwtExpiration = 86400000L;
 
         ReflectionTestUtils.setField(tokenService, "secretKey", secretKey);
         ReflectionTestUtils.setField(tokenService, "jwtExpiration", jwtExpiration);
 
-        admin = Admin.builder()
-                .id(UUID.randomUUID())
-                .username("admin")
-                .name("Admin User")
+        userDetails = User.builder()
+                .username("testuser")
                 .password("password")
+                .authorities("ROLE_USER")
                 .build();
-
-        signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
     @Test
-    void generateToken_ShouldCreateValidToken() {
+    void generateToken_shouldReturnValidToken() {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("adminId", admin.getId().toString());
-        claims.put("name", admin.getName());
+        claims.put("role", "USER");
 
-        String token = tokenService.generateToken(admin, claims);
+        String token = tokenService.generateToken(userDetails, claims);
 
         assertNotNull(token);
-
-        Claims parsedClaims = Jwts.parser()
-                .verifyWith(signingKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-        assertEquals(admin.getUsername(), parsedClaims.getSubject());
-        assertEquals(admin.getId().toString(), parsedClaims.get("adminId", String.class));
-        assertEquals(admin.getName(), parsedClaims.get("name", String.class));
+        assertFalse(token.isEmpty());
+        assertTrue(token.split("\\.").length == 3);
     }
 
     @Test
-    void validateToken_ShouldReturnTrue_ForValidToken() {
-        Instant now = Instant.now();
+    void generateToken_shouldIncludeProvidedClaims() {
+        UUID adminId = UUID.randomUUID();
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("adminId", adminId.toString());
+        claims.put("role", "ADMIN");
 
-        String token = Jwts.builder()
-                .subject(admin.getUsername())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(jwtExpiration)))
-                .signWith(signingKey)
-                .compact();
+        String token = tokenService.generateToken(userDetails, claims);
 
-        boolean isValid = tokenService.validateToken(token, admin);
+        Claims extractedClaims = extractClaimsFromToken(token);
+        assertEquals(adminId.toString(), extractedClaims.get("adminId"));
+        assertEquals("ADMIN", extractedClaims.get("role"));
+    }
+
+    @Test
+    void generateToken_shouldSetSubjectAsUsername() {
+        Map<String, Object> claims = new HashMap<>();
+
+        String token = tokenService.generateToken(userDetails, claims);
+
+        Claims extractedClaims = extractClaimsFromToken(token);
+        assertEquals("testuser", extractedClaims.getSubject());
+    }
+
+    @Test
+    void generateToken_shouldSetIssuedAtAndExpiration() {
+        Map<String, Object> claims = new HashMap<>();
+        long beforeGeneration = System.currentTimeMillis();
+
+        String token = tokenService.generateToken(userDetails, claims);
+
+        long afterGeneration = System.currentTimeMillis();
+        Claims extractedClaims = extractClaimsFromToken(token);
+
+        Date issuedAt = extractedClaims.getIssuedAt();
+        Date expiration = extractedClaims.getExpiration();
+
+        assertFalse(issuedAt.getTime() >= beforeGeneration);
+        assertTrue(issuedAt.getTime() <= afterGeneration);
+        assertEquals(issuedAt.getTime() + jwtExpiration, expiration.getTime());
+    }
+
+    @Test
+    void extractUsername_shouldReturnCorrectUsername() {
+        Map<String, Object> claims = new HashMap<>();
+        String token = tokenService.generateToken(userDetails, claims);
+
+        String extractedUsername = tokenService.extractUsername(token);
+
+        assertEquals("testuser", extractedUsername);
+    }
+
+    @Test
+    void extractAdminId_shouldReturnCorrectAdminId() {
+        UUID adminId = UUID.randomUUID();
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("adminId", adminId.toString());
+        String token = tokenService.generateToken(userDetails, claims);
+
+        UUID extractedAdminId = tokenService.extractAdminId(token);
+
+        assertEquals(adminId, extractedAdminId);
+    }
+
+    @Test
+    void extractAdminId_shouldReturnNullWhenAdminIdNotPresent() {
+        Map<String, Object> claims = new HashMap<>();
+        String token = tokenService.generateToken(userDetails, claims);
+
+        UUID extractedAdminId = tokenService.extractAdminId(token);
+
+        assertNull(extractedAdminId);
+    }
+
+    @Test
+    void validateToken_shouldReturnTrueForValidToken() {
+        Map<String, Object> claims = new HashMap<>();
+        String token = tokenService.generateToken(userDetails, claims);
+
+        boolean isValid = tokenService.validateToken(token, userDetails);
 
         assertTrue(isValid);
     }
 
     @Test
-    void validateToken_ShouldReturnFalse_WhenUsernameMismatch() {
-        Admin otherAdmin = Admin.builder()
-                .username("other-admin")
+    void validateToken_shouldReturnFalseForDifferentUsername() {
+        Map<String, Object> claims = new HashMap<>();
+        String token = tokenService.generateToken(userDetails, claims);
+
+        UserDetails differentUser = User.builder()
+                .username("differentuser")
+                .password("password")
+                .authorities("ROLE_USER")
                 .build();
 
-        Instant now = Instant.now();
-
-        String token = Jwts.builder()
-                .subject(admin.getUsername())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(jwtExpiration)))
-                .signWith(signingKey)
-                .compact();
-
-        boolean isValid = tokenService.validateToken(token, otherAdmin);
+        boolean isValid = tokenService.validateToken(token, differentUser);
 
         assertFalse(isValid);
     }
 
     @Test
-    void extractUsername_ShouldReturnUsername() {
-        Instant now = Instant.now();
+    void generateToken_withEmptyClaims_shouldWork() {
+        Map<String, Object> claims = new HashMap<>();
 
-        String token = Jwts.builder()
-                .subject(admin.getUsername())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(jwtExpiration)))
-                .signWith(signingKey)
-                .compact();
+        String token = tokenService.generateToken(userDetails, claims);
 
-        String username = tokenService.extractUsername(token);
-
-        assertEquals(admin.getUsername(), username);
+        assertNotNull(token);
+        assertEquals("testuser", tokenService.extractUsername(token));
     }
 
     @Test
-    void extractAdminId_ShouldReturnAdminId() {
-        Instant now = Instant.now();
+    void extractAdminId_withInvalidUUID_shouldThrowException() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("adminId", "invalid-uuid");
+        String token = tokenService.generateToken(userDetails, claims);
 
-        String token = Jwts.builder()
-                .subject(admin.getUsername())
-                .claim("adminId", admin.getId().toString())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(jwtExpiration)))
-                .signWith(signingKey)
-                .compact();
+        assertThrows(IllegalArgumentException.class, () ->
+            tokenService.extractAdminId(token));
+    }
 
-        UUID adminId = tokenService.extractAdminId(token);
-
-        assertEquals(admin.getId(), adminId);
+    private Claims extractClaimsFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey)))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

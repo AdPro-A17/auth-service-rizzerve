@@ -115,9 +115,9 @@ class AdminRegisterRequestTest {
     @Test
     void testEqualsWithNull() {
         AdminRegisterRequest request = new AdminRegisterRequest();
-        AdminRegisterRequest request_test = new AdminRegisterRequest();
+        AdminRegisterRequest requestTest = new AdminRegisterRequest();
         assertNotEquals(null, request);
-        assertEquals(request_test, request);
+        assertEquals(requestTest, request);
 
         AdminRegisterRequest request2 = new AdminRegisterRequest("name", null, null);
         AdminRegisterRequest request3 = new AdminRegisterRequest(null, "user", null);

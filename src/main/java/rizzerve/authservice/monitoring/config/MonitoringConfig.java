@@ -18,7 +18,7 @@ public class MonitoringConfig {
     @Bean
     public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config()
-                .commonTags("application", "rizzerve-auth-service")
+                .commonTags("application", "auth-service")
                 .commonTags("version", "1.0.0");
     }
 
