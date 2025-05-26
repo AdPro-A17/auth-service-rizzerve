@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardServiceImplTest {
@@ -70,12 +69,6 @@ class DashboardServiceImplTest {
 
             assertNotNull(dashboardData);
             assertEquals(EXPECTED_WELCOME_MESSAGE, dashboardData.get("welcomeMessage"));
-        }
-
-        @Test
-        @DisplayName("Should record dashboard access in metrics")
-        void getDashboardData_ShouldRecordMetrics() {
-            dashboardService.getDashboardData(admin);
         }
 
         @Test

@@ -116,16 +116,6 @@ class AdminRegistrationServiceTest {
     }
 
     @Test
-    void registerAdmin_CallsMetricsService() {
-        when(adminRepository.existsByUsername(validRequest.getUsername())).thenReturn(false);
-        when(passwordEncoder.encode(validRequest.getPassword())).thenReturn("encodedPassword123");
-        when(adminRepository.save(any(Admin.class))).thenReturn(mockAdmin);
-        when(tokenService.generateToken(any(Admin.class), any(Map.class))).thenReturn(mockToken);
-
-        adminRegistrationService.registerAdmin(validRequest);
-    }
-
-    @Test
     void registerAdmin_CallsTokenServiceWithCorrectParameters() {
         when(adminRepository.existsByUsername(validRequest.getUsername())).thenReturn(false);
         when(passwordEncoder.encode(validRequest.getPassword())).thenReturn("encodedPassword123");

@@ -10,7 +10,6 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.security.token.TokenService;
@@ -19,11 +18,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtAuthFilterTest {
+class JwtAuthFilterTest {
 
     @Mock
     private TokenService tokenService;
@@ -37,7 +35,6 @@ public class JwtAuthFilterTest {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
     private MockFilterChain filterChain;
-    private UserDetails userDetails;
 
     @BeforeEach
     void setup() {
@@ -50,7 +47,6 @@ public class JwtAuthFilterTest {
         admin.setId(UUID.randomUUID());
         admin.setUsername("testuser");
         admin.setPassword("encodedPassword");
-        userDetails = admin;
     }
 
     @Test

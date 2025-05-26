@@ -48,7 +48,7 @@ class JwtTokenServiceTest {
 
         assertNotNull(token);
         assertFalse(token.isEmpty());
-        assertTrue(token.split("\\.").length == 3);
+        assertEquals(3, token.split("\\.").length);
     }
 
     @Test
@@ -88,7 +88,7 @@ class JwtTokenServiceTest {
         Date issuedAt = extractedClaims.getIssuedAt();
         Date expiration = extractedClaims.getExpiration();
 
-        assertFalse(issuedAt.getTime() >= beforeGeneration);
+        assertTrue(issuedAt.getTime() >= beforeGeneration);
         assertTrue(issuedAt.getTime() <= afterGeneration);
         assertEquals(issuedAt.getTime() + jwtExpiration, expiration.getTime());
     }
@@ -168,14 +168,14 @@ class JwtTokenServiceTest {
         String token = tokenService.generateToken(userDetails, claims);
 
         assertThrows(IllegalArgumentException.class, () ->
-            tokenService.extractAdminId(token));
+                tokenService.extractAdminId(token));
     }
 
     private Claims extractClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey)))
+                .verifyWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey)))
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
