@@ -57,6 +57,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")

@@ -5,9 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import rizzerve.authservice.monitoring.service.MetricsService;
 
 import java.security.Key;
 import java.util.Date;
@@ -16,6 +18,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtTokenService implements TokenService {
     @Value("${jwt.secret}")
     private String secretKey;
@@ -23,8 +26,11 @@ public class JwtTokenService implements TokenService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
+    private final MetricsService metricsService;
+
     @Override
     public String generateToken(UserDetails userDetails, Map<String, Object> claims) {
+        metricsService.recordTokenGeneration();
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
@@ -33,7 +39,6 @@ public class JwtTokenService implements TokenService {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
 
     @Override
     public boolean validateToken(String token, UserDetails userDetails) {
@@ -79,4 +84,3 @@ public class JwtTokenService implements TokenService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
-

@@ -13,7 +13,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import rizzerve.authservice.monitoring.service.MetricsService;
 import rizzerve.authservice.security.token.TokenService;
+import rizzerve.authservice.service.admin.AdminTokenService;
 
 import java.io.IOException;
 
@@ -22,6 +24,8 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
+    private final MetricsService metricsService;
+    private final AdminTokenService adminTokenService;
 
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -39,6 +43,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         final String jwt = extractJwtFromHeader(authHeader);
+
+        if (adminTokenService.isTokenBlacklisted(jwt)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         final String username = tokenService.extractUsername(jwt);
 
         if (username != null && isAuthenticationRequired()) {
@@ -63,7 +73,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private void processAuthentication(HttpServletRequest request, String jwt, String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        if (tokenService.validateToken(jwt, userDetails)) {
+        boolean isValid = tokenService.validateToken(jwt, userDetails);
+        metricsService.recordTokenValidation(isValid);
+
+        if (isValid) {
             UsernamePasswordAuthenticationToken authToken = createAuthenticationToken(userDetails);
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);

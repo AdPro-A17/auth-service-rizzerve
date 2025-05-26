@@ -8,6 +8,7 @@ import rizzerve.authservice.dto.admin.AdminProfileResponse;
 import rizzerve.authservice.dto.admin.AdminUpdateNameRequest;
 import rizzerve.authservice.exception.AdminNotFoundException;
 import rizzerve.authservice.model.Admin;
+import rizzerve.authservice.monitoring.service.MetricsService;
 import rizzerve.authservice.repository.AdminRepository;
 import io.micrometer.core.annotation.Timed;
 
@@ -17,6 +18,7 @@ import io.micrometer.core.annotation.Timed;
 public class AdminManagementServiceImpl implements AdminManagementService {
 
     private final AdminRepository adminRepository;
+    private final MetricsService metricsService;
 
     @Override
     @Transactional
@@ -29,6 +31,8 @@ public class AdminManagementServiceImpl implements AdminManagementService {
 
         existingAdmin.setName(request.getName());
         Admin updatedAdmin = adminRepository.save(existingAdmin);
+
+        metricsService.recordProfileUpdate(admin.getUsername());
         log.info("Admin name updated successfully for: {}", admin.getUsername());
 
         return AdminProfileResponse.builder()
@@ -48,6 +52,7 @@ public class AdminManagementServiceImpl implements AdminManagementService {
 
         adminRepository.delete(existingAdmin);
 
+        metricsService.recordAccountDeletion(admin.getUsername());
         log.info("Admin account deleted successfully for: {}", admin.getUsername());
     }
 }
