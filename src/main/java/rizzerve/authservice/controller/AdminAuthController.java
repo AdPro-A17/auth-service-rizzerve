@@ -13,10 +13,8 @@ import rizzerve.authservice.dto.admin.AdminRegisterRequest;
 import rizzerve.authservice.dto.admin.AdminUpdateNameRequest;
 import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.service.admin.AdminAuthenticationService;
-import rizzerve.authservice.service.admin.AdminManagementService;
 import rizzerve.authservice.service.admin.AdminProfileService;
 import rizzerve.authservice.service.admin.AdminRegistrationService;
-import rizzerve.authservice.service.admin.AdminTokenService;
 
 import java.util.Map;
 
