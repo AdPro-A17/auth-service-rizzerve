@@ -18,7 +18,6 @@ public class SecurityEndpointConfig {
     private final SecurityCorsConfig corsConfig;
     private final SecurityAuthProviderConfig authConfig;
 
-    // Constants for better maintainability
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/api/auth/**",
             "/api/customer/session/**",

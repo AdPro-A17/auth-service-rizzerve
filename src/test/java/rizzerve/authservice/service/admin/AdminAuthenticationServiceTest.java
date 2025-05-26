@@ -15,7 +15,6 @@ import org.springframework.security.core.AuthenticationException;
 import rizzerve.authservice.dto.admin.AdminAuthResponse;
 import rizzerve.authservice.dto.admin.AdminLoginRequest;
 import rizzerve.authservice.model.Admin;
-import rizzerve.authservice.monitoring.service.MetricsService;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
@@ -39,9 +38,6 @@ class AdminAuthenticationServiceTest {
 
     @Mock
     private AuthenticationManager authenticationManager;
-
-    @Mock
-    private MetricsService metricsService;
 
     @InjectMocks
     private AdminAuthenticationServiceImpl adminAuthenticationService;
@@ -90,25 +86,19 @@ class AdminAuthenticationServiceTest {
             assertEquals(admin.getName(), response.getName());
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-            verify(metricsService).recordSuccessfulLogin(loginRequest.getUsername());
-            verifyNoMoreInteractions(metricsService);
         }
 
         @Test
         @DisplayName("Should throw BadCredentialsException when authentication fails")
         void authenticateAdmin_AuthenticationFailure() {
-            // Arrange
             when(authenticationManager.authenticate(any()))
                     .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-            // Act & Assert
             AuthenticationException exception = assertThrows(BadCredentialsException.class, () ->
                     adminAuthenticationService.authenticateAdmin(loginRequest)
             );
 
             assertEquals("Invalid credentials", exception.getMessage());
-            verify(metricsService).recordFailedLogin(loginRequest.getUsername(), "invalid_credentials");
-            verifyNoMoreInteractions(metricsService);
         }
 
         @Test
@@ -122,8 +112,6 @@ class AdminAuthenticationServiceTest {
             );
 
             assertEquals("Authentication failed", exception.getMessage());
-            verify(metricsService).recordFailedLogin(loginRequest.getUsername(), "system_error");
-            verifyNoMoreInteractions(metricsService);
         }
     }
 }

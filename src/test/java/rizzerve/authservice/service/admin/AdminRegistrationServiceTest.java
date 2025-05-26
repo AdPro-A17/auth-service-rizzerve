@@ -12,7 +12,6 @@ import rizzerve.authservice.dto.admin.AdminAuthResponse;
 import rizzerve.authservice.dto.admin.AdminRegisterRequest;
 import rizzerve.authservice.exception.AdminAlreadyExistsException;
 import rizzerve.authservice.model.Admin;
-import rizzerve.authservice.monitoring.service.MetricsService;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenService;
 
@@ -34,9 +33,6 @@ class AdminRegistrationServiceTest {
 
     @Mock
     private TokenService tokenService;
-
-    @Mock
-    private MetricsService metricsService;
 
     @InjectMocks
     private AdminRegistrationServiceImpl adminRegistrationService;
@@ -82,7 +78,6 @@ class AdminRegistrationServiceTest {
         verify(passwordEncoder).encode(validRequest.getPassword());
         verify(adminRepository).save(any(Admin.class));
         verify(tokenService).generateToken(eq(mockAdmin), any(Map.class));
-        verify(metricsService).recordRegistration(validRequest.getUsername());
     }
 
     @Test
@@ -100,7 +95,6 @@ class AdminRegistrationServiceTest {
         verify(passwordEncoder, never()).encode(anyString());
         verify(adminRepository, never()).save(any(Admin.class));
         verify(tokenService, never()).generateToken(any(), any());
-        verify(metricsService, never()).recordRegistration(anyString());
     }
 
     @Test
@@ -129,8 +123,6 @@ class AdminRegistrationServiceTest {
         when(tokenService.generateToken(any(Admin.class), any(Map.class))).thenReturn(mockToken);
 
         adminRegistrationService.registerAdmin(validRequest);
-
-        verify(metricsService).recordRegistration(validRequest.getUsername());
     }
 
     @Test

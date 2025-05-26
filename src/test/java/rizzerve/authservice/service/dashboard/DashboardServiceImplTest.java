@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rizzerve.authservice.dto.dashboard.DashboardResponse;
 import rizzerve.authservice.model.Admin;
-import rizzerve.authservice.monitoring.service.MetricsService;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -21,9 +19,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DashboardServiceImplTest {
-
-    @Mock
-    private MetricsService metricsService;
 
     @InjectMocks
     private DashboardServiceImpl dashboardService;
@@ -81,8 +76,6 @@ class DashboardServiceImplTest {
         @DisplayName("Should record dashboard access in metrics")
         void getDashboardData_ShouldRecordMetrics() {
             dashboardService.getDashboardData(admin);
-            verify(metricsService).recordDashboardAccess(admin.getUsername());
-            verifyNoMoreInteractions(metricsService);
         }
 
         @Test

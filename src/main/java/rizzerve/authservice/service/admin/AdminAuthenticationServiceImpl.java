@@ -10,7 +10,6 @@ import rizzerve.authservice.dto.admin.AdminAuthResponse;
 import rizzerve.authservice.dto.admin.AdminLoginRequest;
 import rizzerve.authservice.exception.AdminNotFoundException;
 import rizzerve.authservice.model.Admin;
-import rizzerve.authservice.monitoring.service.MetricsService;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
@@ -24,7 +23,6 @@ public class AdminAuthenticationServiceImpl implements AdminAuthenticationServic
     private final AdminRepository adminRepository;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
-    private final MetricsService metricsService;
 
     @Override
     @Timed(value = "auth.login.duration", description = "Time taken for admin login")
@@ -36,18 +34,14 @@ public class AdminAuthenticationServiceImpl implements AdminAuthenticationServic
             Admin admin = findAdminByUsername(request.getUsername());
             String token = generateTokenForAdmin(admin);
 
-            metricsService.recordSuccessfulLogin(request.getUsername());
-
             log.info("Admin authentication successful for: {}", request.getUsername());
             return buildAuthResponse(admin, token);
 
         } catch (AuthenticationException e) {
             log.warn("Authentication failed for admin: {}", request.getUsername());
-            metricsService.recordFailedLogin(request.getUsername(), "invalid_credentials");
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during authentication for admin: {}", request.getUsername(), e);
-            metricsService.recordFailedLogin(request.getUsername(), "system_error");
             throw new RuntimeException("Authentication failed", e);
         }
     }
