@@ -26,7 +26,7 @@ public class SecurityCorsConfig {
     }
 
     protected List<String> getAllowedOrigins() {
-        return List.of("${FRONTEND_URL}:http://localhost:3000");
+        return List.of("${FRONTEND_URL:http://localhost:3000}");
     }
 
     protected List<String> getAllowedMethods() {
