@@ -80,14 +80,6 @@ class AdminManagementServiceImplTest {
         verify(adminRepository, never()).save(any(Admin.class));
     }
 
-    private static Stream<Arguments> invalidNameProvider() {
-        return Stream.of(
-                Arguments.of("null", null),
-                Arguments.of("empty string", ""),
-                Arguments.of("blank string", "   ")
-        );
-    }
-
     @Test
     void deleteAdminAccount_ShouldDeleteAdmin_WhenAdminExists() {
         when(adminRepository.findById(testAdmin.getId())).thenReturn(Optional.of(testAdmin));

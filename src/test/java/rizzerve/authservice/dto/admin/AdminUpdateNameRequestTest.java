@@ -5,6 +5,9 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Set;
 
@@ -30,34 +33,12 @@ class AdminUpdateNameRequestTest {
         assertThat(violations).isEmpty();
     }
 
-    @Test
-    void validation_ShouldFail_WhenNameIsNull() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"   ", "\t", "\n", "  \t\n  "})
+    void validation_ShouldFail_WhenNameIsNullOrBlank(String invalidName) {
         AdminUpdateNameRequest request = AdminUpdateNameRequest.builder()
-                .name(null)
-                .build();
-
-        Set<ConstraintViolation<AdminUpdateNameRequest>> violations = validator.validate(request);
-
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("Name is required");
-    }
-
-    @Test
-    void validation_ShouldFail_WhenNameIsBlank() {
-        AdminUpdateNameRequest request = AdminUpdateNameRequest.builder()
-                .name("   ")
-                .build();
-
-        Set<ConstraintViolation<AdminUpdateNameRequest>> violations = validator.validate(request);
-
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("Name is required");
-    }
-
-    @Test
-    void validation_ShouldFail_WhenNameIsEmpty() {
-        AdminUpdateNameRequest request = AdminUpdateNameRequest.builder()
-                .name("")
+                .name(invalidName)
                 .build();
 
         Set<ConstraintViolation<AdminUpdateNameRequest>> violations = validator.validate(request);
