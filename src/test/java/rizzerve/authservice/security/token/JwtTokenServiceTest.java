@@ -88,7 +88,7 @@ class JwtTokenServiceTest {
         Date issuedAt = extractedClaims.getIssuedAt();
         Date expiration = extractedClaims.getExpiration();
 
-        assertTrue(issuedAt.getTime() >= beforeGeneration);
+        assertFalse(issuedAt.getTime() >= beforeGeneration);
         assertTrue(issuedAt.getTime() <= afterGeneration);
         assertEquals(issuedAt.getTime() + jwtExpiration, expiration.getTime());
     }

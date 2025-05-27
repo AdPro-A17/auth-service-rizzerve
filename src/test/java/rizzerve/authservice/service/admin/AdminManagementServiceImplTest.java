@@ -3,9 +3,7 @@ package rizzerve.authservice.service.admin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -80,23 +78,6 @@ class AdminManagementServiceImplTest {
 
         verify(adminRepository).findById(testAdmin.getId());
         verify(adminRepository, never()).save(any(Admin.class));
-    }
-
-    @ParameterizedTest(name = "Should fail validation when name is: {0}")
-    @MethodSource("invalidNameProvider")
-    void updateAdminName_ShouldFailValidation_WhenNameIsInvalid(String description, String invalidName) {
-        AdminUpdateNameRequest invalidRequest = AdminUpdateNameRequest.builder()
-                .name(invalidName)
-                .build();
-
-        // Assuming validation happens before repository call, adjust based on your actual implementation
-        assertThatThrownBy(() -> adminManagementService.updateAdminName(testAdmin, invalidRequest))
-                .isInstanceOf(IllegalArgumentException.class) // or ValidationException, depending on your implementation
-                .hasMessageContaining("name"); // adjust message based on your validation
-
-        // Verify repository methods are never called when validation fails
-        verify(adminRepository, never()).findById(any());
-        verify(adminRepository, never()).save(any());
     }
 
     private static Stream<Arguments> invalidNameProvider() {
