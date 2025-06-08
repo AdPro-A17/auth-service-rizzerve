@@ -9,6 +9,7 @@ import rizzerve.authservice.dto.admin.AdminUpdateNameRequest;
 import rizzerve.authservice.exception.AdminNotFoundException;
 import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.repository.AdminRepository;
+import rizzerve.authservice.service.metrics.MetricsService;
 import io.micrometer.core.annotation.Timed;
 
 @Slf4j
@@ -17,23 +18,32 @@ import io.micrometer.core.annotation.Timed;
 public class AdminManagementServiceImpl implements AdminManagementService {
 
     private final AdminRepository adminRepository;
+    private final MetricsService metricsService;
 
     @Override
     @Transactional
     public AdminProfileResponse updateAdminName(Admin admin, AdminUpdateNameRequest request) {
         log.debug("Updating name for admin: {}", admin.getUsername());
 
-        Admin existingAdmin = adminRepository.findById(admin.getId())
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
+        try {
+            Admin existingAdmin = adminRepository.findById(admin.getId())
+                    .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
 
-        existingAdmin.setName(request.getName());
-        Admin updatedAdmin = adminRepository.save(existingAdmin);
-        log.info("Admin name updated successfully for: {}", admin.getUsername());
+            existingAdmin.setName(request.getName());
+            Admin updatedAdmin = adminRepository.save(existingAdmin);
 
-        return AdminProfileResponse.builder()
-                .username(updatedAdmin.getUsername())
-                .name(updatedAdmin.getName())
-                .build();
+            metricsService.incrementAdminProfileUpdateCounter();
+
+            log.info("Admin name updated successfully for: {}", admin.getUsername());
+
+            return AdminProfileResponse.builder()
+                    .username(updatedAdmin.getUsername())
+                    .name(updatedAdmin.getName())
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to update admin profile for: {}", admin.getUsername(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -42,11 +52,18 @@ public class AdminManagementServiceImpl implements AdminManagementService {
     public void deleteAdminAccount(Admin admin) {
         log.debug("Deleting account for admin: {}", admin.getUsername());
 
-        Admin existingAdmin = adminRepository.findById(admin.getId())
-                .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
+        try {
+            Admin existingAdmin = adminRepository.findById(admin.getId())
+                    .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
 
-        adminRepository.delete(existingAdmin);
+            adminRepository.delete(existingAdmin);
 
-        log.info("Admin account deleted successfully for: {}", admin.getUsername());
+            metricsService.incrementAdminAccountDeleteCounter();
+
+            log.info("Admin account deleted successfully for: {}", admin.getUsername());
+        } catch (Exception e) {
+            log.error("Failed to delete admin account for: {}", admin.getUsername(), e);
+            throw e;
+        }
     }
 }

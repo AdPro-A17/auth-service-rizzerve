@@ -13,6 +13,8 @@ import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
+import rizzerve.authservice.service.metrics.MetricsService;
+import io.micrometer.core.instrument.Timer;
 
 @Slf4j
 @Service
@@ -22,24 +24,39 @@ public class AdminAuthenticationServiceImpl implements AdminAuthenticationServic
     private final AdminRepository adminRepository;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
+    private final MetricsService metricsService;
 
     @Override
     public AdminAuthResponse authenticateAdmin(AdminLoginRequest request) {
         log.debug("Attempting authentication for admin: {}", request.getUsername());
+
+        Timer.Sample loginTimer = metricsService.startAdminLoginTimer();
 
         try {
             performAuthentication(request);
             Admin admin = findAdminByUsername(request.getUsername());
             String token = generateTokenForAdmin(admin);
 
+            metricsService.incrementAdminLoginSuccessCounter();
+            metricsService.recordAdminLoginDuration(loginTimer);
+
             log.info("Admin authentication successful for: {}", request.getUsername());
             return buildAuthResponse(admin, token);
 
         } catch (AuthenticationException e) {
             log.warn("Authentication failed for admin: {}", request.getUsername());
+            metricsService.incrementAdminLoginFailureCounter("authentication_failed");
+            metricsService.recordAdminLoginDuration(loginTimer);
+            throw e;
+        } catch (AdminNotFoundException e) {
+            log.warn("Admin not found during authentication: {}", request.getUsername());
+            metricsService.incrementAdminLoginFailureCounter("admin_not_found");
+            metricsService.recordAdminLoginDuration(loginTimer);
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during authentication for admin: {}", request.getUsername(), e);
+            metricsService.incrementAdminLoginFailureCounter("unexpected_error");
+            metricsService.recordAdminLoginDuration(loginTimer);
             throw new RuntimeException("Authentication failed", e);
         }
     }

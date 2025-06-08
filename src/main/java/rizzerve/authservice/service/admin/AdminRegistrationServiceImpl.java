@@ -10,6 +10,8 @@ import rizzerve.authservice.model.Admin;
 import rizzerve.authservice.repository.AdminRepository;
 import rizzerve.authservice.security.token.TokenClaimsExtractor;
 import rizzerve.authservice.security.token.TokenService;
+import rizzerve.authservice.service.metrics.MetricsService;
+import io.micrometer.core.instrument.Timer;
 
 @Service
 @RequiredArgsConstructor
@@ -17,20 +19,32 @@ public class AdminRegistrationServiceImpl implements AdminRegistrationService {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final MetricsService metricsService;
 
     @Override
     public AdminAuthResponse registerAdmin(AdminRegisterRequest request) {
-        if(adminRepository.existsByUsername(request.getUsername())) {
-            throw new AdminAlreadyExistsException("Username already exists");
+        Timer.Sample registrationTimer = metricsService.startAdminRegistrationTimer();
+
+        try {
+            if(adminRepository.existsByUsername(request.getUsername())) {
+                throw new AdminAlreadyExistsException("Username already exists");
+            }
+
+            Admin admin = buildAdminFromRequest(request);
+            Admin savedAdmin = adminRepository.save(admin);
+
+            String token = tokenService.generateToken(savedAdmin,
+                    TokenClaimsExtractor.extractAdminClaims(savedAdmin));
+
+            metricsService.incrementAdminRegistrationCounter();
+            metricsService.recordAdminRegistrationDuration(registrationTimer);
+
+            return buildAuthResponse(savedAdmin, token);
+
+        } catch (Exception e) {
+            metricsService.recordAdminRegistrationDuration(registrationTimer);
+            throw e;
         }
-
-        Admin admin = buildAdminFromRequest(request);
-        Admin savedAdmin = adminRepository.save(admin);
-
-        String token = tokenService.generateToken(savedAdmin,
-                TokenClaimsExtractor.extractAdminClaims(savedAdmin));
-
-        return buildAuthResponse(savedAdmin, token);
     }
 
     private Admin buildAdminFromRequest(AdminRegisterRequest request) {

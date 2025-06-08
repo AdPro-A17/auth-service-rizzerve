@@ -25,7 +25,9 @@ public class SecurityEndpointConfig {
             "/api/table/**",
             "/api/orders/**",
             "/api/checkouts/**",
-            "/actuator/**"
+            "/actuator/**",
+            "/api/metrics/**",
+            "/api/test/**"
     );
 
     private static final List<String> ADMIN_ENDPOINTS = List.of("/api/admin/**");
